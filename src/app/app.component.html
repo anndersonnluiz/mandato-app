@@ -1,0 +1,848 @@
+<a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+<main id="conteudo-principal" tabindex="-1">
+  <header>
+    <div>
+      <small>MANDATO</small>
+      <h1 *ngIf="game">Gabinete de {{ game.mayorName }}</h1>
+      <h1 *ngIf="!game">Primeiro dia de governo</h1>
+    </div>
+    <span *ngIf="game" class="header-actions"
+      >{{ game.cityName }} · {{ formatDate(game.currentDate) }}
+      <small class="storage-badge">{{ storageModeLabel() }}</small
+      ><button
+        class="reconnect"
+        *ngIf="onlineMode && connectionStatus === 'UNAVAILABLE'"
+        (click)="checkApiConnection()"
+      >
+        Tentar reconectar
+      </button></span
+    >
+    <details *ngIf="game" id="configuracoes" class="game-menu">
+      <summary aria-label="Abrir ações da partida">Ações da partida <span aria-hidden="true">⌄</span></summary>
+      <div class="game-menu-items">
+        <button (click)="exportParityProjection()">Exportar projeção de paridade</button>
+        <button (click)="exportSave()">Exportar backup</button>
+        <label class="import-button">Importar backup<input type="file" accept="application/json,.json" (change)="importSave($event)" /></label>
+        <button class="reset" (click)="reset()">Encerrar partida</button>
+      </div>
+    </details>
+  </header>
+  <nav *ngIf="game" class="area-nav" aria-label="Áreas do governo">
+    <a href="#gabinete" [class.active]="activeArea === 'gabinete'" [attr.aria-current]="activeArea === 'gabinete' ? 'page' : null" (click)="selectArea('gabinete')">Gabinete</a>
+    <a href="#cidade" [class.active]="activeArea === 'cidade'" [attr.aria-current]="activeArea === 'cidade' ? 'page' : null" (click)="selectArea('cidade')">Cidade</a>
+    <a href="#financas" [class.active]="activeArea === 'financas'" [attr.aria-current]="activeArea === 'financas' ? 'page' : null" (click)="selectArea('financas')">Finanças</a>
+    <a href="#memoria" [class.active]="activeArea === 'memoria'" [attr.aria-current]="activeArea === 'memoria' ? 'page' : null" (click)="selectArea('memoria')">Memória</a>
+    <a href="#metas" [class.active]="activeArea === 'metas'" [attr.aria-current]="activeArea === 'metas' ? 'page' : null" (click)="selectArea('metas')">Metas</a>
+    <a href="#avaliacao" [class.active]="activeArea === 'avaliacao'" [attr.aria-current]="activeArea === 'avaliacao' ? 'page' : null" (click)="selectArea('avaliacao')">Avaliação</a>
+    <a href="#configuracoes" [class.active]="activeArea === 'configuracoes'" [attr.aria-current]="activeArea === 'configuracoes' ? 'page' : null" (click)="selectArea('configuracoes')">Configurações</a>
+  </nav>
+  <section *ngIf="!game" class="start">
+    <h2>Comece seu mandato</h2>
+    <input [(ngModel)]="mayorName" placeholder="Nome do prefeito" /><input
+      [(ngModel)]="cityName"
+      placeholder="Nome da cidade"
+    /><label class="mode-toggle"
+      ><input
+        type="checkbox"
+        [ngModel]="onlineMode"
+        (ngModelChange)="setOnlineMode($event)"
+      />
+      Usar API online</label
+    ><button (click)="create()">Criar partida</button>
+    <p aria-live="polite">{{ feedback }}</p>
+  </section>
+  <ng-container *ngIf="game">
+    <div class="stats">
+      <article>
+        <small>APROVAÇÃO</small
+        ><strong>{{ game.approval | number: "1.1-1" }}%</strong>
+      </article>
+      <article>
+        <small>DIAS RESTANTES</small><strong>{{ daysRemaining() }}</strong>
+      </article>
+      <article>
+        <small>POPULAÇÃO</small><strong>{{ game.population | number }}</strong
+        ><em class="population-trend">{{ populationTrendLabel() }}</em>
+      </article>
+      <article>
+        <small>CAIXA</small><strong>R$ {{ game.treasury | number }}</strong>
+      </article>
+      <article>
+        <small>DÍVIDA</small><strong>R$ {{ game.debt | number }}</strong>
+      </article>
+      <article
+        class="fiscal-card"
+        [class.fiscal-warning]="fiscalStability() < 60"
+        [class.fiscal-critical]="fiscalStability() < 30"
+        [attr.aria-label]="
+          'Sustentabilidade fiscal: ' + fiscalStability() + ' por cento'
+        "
+      >
+        <small>SUSTENTABILIDADE FISCAL</small
+        ><strong>{{ fiscalStability() }}%</strong>
+      </article>
+    </div>
+    <p class="feedback" aria-live="polite">{{ feedback }}</p>
+    <button *ngIf="pendingOnlineAction && connectionStatus === 'UNAVAILABLE'" (click)="retryOnlineAction()">Tentar novamente</button>
+    <section class="panel daily-summary" *ngIf="dailySummary().length">
+      <h2>Resumo do dia {{ formatDate(game.currentDate) }}</h2>
+      <div class="summary-groups">
+        <div class="summary-group" *ngFor="let group of dailySummaryGroups()">
+          <h3>{{ group.category }}</h3>
+          <span *ngFor="let item of group.items"
+            ><small>{{ item.label }}</small
+            ><b>{{ item.value }}</b></span
+          >
+        </div>
+      </div>
+    </section>
+    <section class="panel daily-events" *ngIf="dailyEvents().length">
+      <div class="panel-heading">
+        <h2>Diário do avanço</h2>
+         <label class="filter-control"><span>Período</span><select aria-label="Selecionar data do Diário" [ngModel]="diaryDate" (ngModelChange)="changeDiaryDate($event)">
+          <option value="CURRENT">Hoje ({{ formatDate(game.currentDate) }})</option>
+          <option *ngFor="let date of diaryDates()" [value]="date">
+            {{ date === 'CURRENT' ? 'Hoje (' + formatDate(game.currentDate) + ')' : formatDate(date) }}
+          </option>
+        </select></label>
+         <label class="filter-control"><span>Categoria</span><select aria-label="Filtrar eventos do Diário" [ngModel]="dailyEventFilter" (ngModelChange)="changeDailyEventFilter($event)">
+          <option value="ALL">Todos</option>
+          <option value="Decisão">Decisões</option>
+          <option value="Receita">Receitas</option>
+          <option value="Despesa">Despesas</option>
+          <option value="Projeto">Projetos</option>
+          <option value="Alerta">Alertas</option>
+          <option value="Registro">Registros</option>
+        </select></label>
+      </div>
+      <div class="daily-feed">
+        <article class="daily-event-card" *ngFor="let event of filteredDailyEvents()">
+          <span class="event-type">{{ event.type }}</span>
+          <p>{{ formatNarrative(event.text) }}</p>
+        </article>
+      </div>
+        <p class="empty-filter" *ngIf="!filteredDailyEvents().length">
+         Nenhum acontecimento desse tipo neste dia.
+       </p>
+       <div class="feed-pagination" *ngIf="dailyEventPageCount() > 1" aria-label="Paginação do Diário" role="navigation">
+         <button type="button" aria-label="Ir para a página anterior do Diário" (click)="previousDiaryPage()" [disabled]="diaryPage === 0">Anterior</button>
+         <span>Página {{ diaryPage + 1 }} de {{ dailyEventPageCount() }}</span>
+         <button type="button" aria-label="Ir para a próxima página do Diário" (click)="nextDiaryPage()" [disabled]="diaryPage >= dailyEventPageCount() - 1">Próxima</button>
+       </div>
+     </section>
+    <section class="alert" *ngIf="game.fiscalAlert">
+      {{ game.fiscalAlert }}
+    </section>
+    <section
+      class="alert"
+      *ngFor="let alert of game.administrativeAlerts | slice: 0 : 2"
+    >
+      {{ alert }}
+    </section>
+    <section class="panel attention" *ngIf="attentionItems().length">
+      <h2>
+        Atenção imediata
+        <small *ngIf="pendingDecisions()"
+          >{{ pendingDecisions() }} decisão(ões) aguardando resposta</small
+        >
+      </h2>
+      <p *ngFor="let item of attentionItems()">⚠ {{ item }}</p>
+    </section>
+    <section id="avaliacao" class="panel evaluation area-anchor" *ngIf="game.evaluation">
+      <small>PRIMEIRO CICLO ENCERRADO</small>
+      <h2>{{ game.evaluation.title }}</h2>
+      <p>{{ game.evaluation.summary }}</p>
+      <strong>Nota do ciclo: {{ game.evaluation.score }}/100</strong
+      ><button (click)="continueMandate()">
+        Continuar mandato por mais 30 dias →
+      </button>
+      <p class="governance-style">
+        <small>ESTILO DE GOVERNO</small
+        ><strong>{{ governanceStyle().title }}</strong
+        >{{ governanceStyle().description }}
+      </p>
+      <div class="evaluation-diagnosis" *ngIf="evaluationDiagnosis().length">
+        <small>LEITURA PARA O PRÓXIMO CICLO</small>
+        <p *ngFor="let item of evaluationDiagnosis()">{{ item }}</p>
+      </div>
+      <p class="evaluation-priority" *ngIf="evaluationPriority()">
+        {{ evaluationPriority() }}
+      </p>
+      <button type="button" class="election-entry" *ngIf="!electionState" (click)="beginElection()">
+        Abrir pré-campanha →
+      </button>
+    </section>
+    <section class="panel election-preview" *ngIf="electionState">
+      <small>PRÉ-CAMPANHA</small>
+      <h2>O mandato virou disputa</h2>
+      <p>Seu histórico de governo agora será confrontado por duas candidaturas de oposição.</p>
+      <div class="election-candidates">
+        <article *ngFor="let candidate of electionState.candidates" [class.incumbent]="candidate.isIncumbent">
+          <span>{{ candidate.isIncumbent ? 'GOVERNO ATUAL' : 'OPOSIÇÃO' }}</span>
+          <strong>{{ candidate.name }}</strong>
+          <small>{{ candidate.style }}</small>
+          <small>{{ candidate.platform }}</small>
+          <small>Apoio projetado {{ candidate.support | number: '1.0-1' }}% · Rejeição {{ candidate.rejection | number: '1.0-1' }}%</small>
+        </article>
+      </div>
+      <div class="campaign-agenda" *ngIf="electionState.incumbentAgenda.length">
+        <small>AGENDA ASSUMIDA</small>
+        <span *ngFor="let promise of electionState.promises">{{ promise.label }} · R$ {{ promise.estimatedCost }} mi · {{ promise.deadlineWeeks }} semanas · {{ promiseEffects(promise.groupEffects) }}</span>
+      </div>
+      <div class="election-poll" *ngIf="electionPoll() as poll">
+        <span><b>{{ poll.period }}</b> · {{ poll.undecided | number: '1.0-1' }}% indecisos</span>
+        <span *ngFor="let candidate of poll.candidates">{{ candidate.name }} <b>{{ candidate.support | number: '1.0-1' }}%</b></span>
+      </div>
+      <div class="poll-history" *ngIf="electionState.pollHistory.length > 1">
+        <div class="poll-history-heading"><small>EVOLUÇÃO DAS PESQUISAS</small><span>{{ electionState.pollHistory.length }} medições</span></div>
+        <div class="poll-row" *ngFor="let poll of electionState.pollHistory">
+          <strong>{{ poll.period }}</strong>
+          <div class="poll-bars">
+            <span *ngFor="let candidate of poll.candidates" [style.width.%]="candidate.support" [title]="candidate.name + ': ' + (candidate.support | number: '1.0-1') + '%'"> </span>
+          </div>
+          <em>{{ poll.candidates[0].support | number: '1.0-1' }}%</em>
+        </div>
+      </div>
+      <p class="panel-note" *ngIf="electionState.phase === 'PRE_CAMPAIGN'">Pré-campanha aberta. Organize sua estratégia antes de pedir o voto.</p>
+      <button type="button" *ngIf="electionState.phase === 'PRE_CAMPAIGN'" (click)="startCampaign()">Iniciar campanha →</button>
+      <div class="campaign-actions" *ngIf="electionState.phase === 'CAMPAIGN'">
+        <small>SEMANA {{ electionState.week + 1 }} DE 3 · verba de campanha <b>{{ electionState.campaignFunds | number: '1.0-0' }} créditos</b></small>
+        <button type="button" [disabled]="electionState.campaignFunds < 10" (click)="runCampaignAction('MEET_GROUPS')">Ouvir grupos sociais <small>−10</small></button>
+        <button type="button" [disabled]="electionState.campaignFunds < 15" (click)="runCampaignAction('VISIT_PROJECT')">Visitar uma entrega <small>−15</small></button>
+        <button type="button" [disabled]="electionState.campaignFunds < 20" (click)="runCampaignAction('CRISIS_COMMUNICATION')">Comunicar em crise <small>−20</small></button>
+        <button type="button" [disabled]="electionState.campaignFunds < 30" (click)="runCampaignAction('NEW_PROMISE')">Lançar promessa <small>−30</small></button>
+      </div>
+      <div class="campaign-actions" *ngIf="electionState.phase === 'DEBATE'">
+        <small>DEBATE · responda à principal crítica da oposição</small>
+        <p class="debate-question">“{{ electionState.debateQuestion }}”</p>
+        <button type="button" (click)="answerElectionDebate('ACCOUNTABILITY')">Prestar contas</button>
+        <button type="button" (click)="answerElectionDebate('PROPOSAL')">Apresentar proposta</button>
+        <button type="button" (click)="answerElectionDebate('ADMIT_FAILURE')">Admitir falhas</button>
+        <button type="button" (click)="answerElectionDebate('ATTACK')">Atacar a oposição</button>
+      </div>
+      <p class="election-result" *ngIf="electionState.explanation">{{ electionState.explanation }}</p>
+      <div class="election-history" *ngIf="electionState.history.length">
+        <small>JORNADA DA CAMPANHA</small>
+        <div *ngFor="let entry of electionState.history">
+          <span>{{ entry.type === 'CAMPAIGN' ? 'Semana ' + entry.week : entry.type === 'DEBATE' ? 'Debate' : 'Resultado' }}</span>
+          <b>{{ campaignActionLabel(entry.label) }}</b>
+          <em>{{ entry.incumbentSupport | number: '1.0-1' }}% apoio<span *ngIf="entry.cost"> · -{{ entry.cost }} créditos</span></em>
+        </div>
+      </div>
+    </section>
+    <section id="metas" class="panel objectives area-anchor" *ngIf="game.objectives?.length">
+      <h2>{{ game.evaluation ? "Metas do ciclo encerrado" : "Metas do ciclo atual" }}</h2>
+      <div *ngFor="let objective of game.objectives" class="objective" [class.objective-done]="objective.status === 'COMPLETED'" [class.objective-failed]="objective.status === 'FAILED'">
+        <div class="objective-heading"><span>{{ objective.label }}</span
+        ><b>{{ objectiveStatusLabel(objective.status) }} ·
+          {{ objective.status === "COMPLETED"
+            ? "100%"
+            : (objective.current | number: "1.0-0") +
+              " / " +
+              (objective.target | number: "1.0-0")
+        }}</b></div
+        ><small class="objective-description">{{ objective.description }}</small>
+        <div class="bar">
+          <i [style.width.%]="objectiveProgress(objective)"></i>
+        </div>
+      </div>
+    </section>
+    <section class="panel cycle-brief" *ngIf="isContinuationCycle()">
+      <h2>Contexto do novo ciclo</h2>
+      <p *ngFor="let item of continuationBrief()">{{ item }}</p>
+    </section>
+    <section class="finance-strip">
+      <span
+        ><small>RECEITA MENSAL PREVISTA</small
+        ><b>R$ {{ projectedMonthlyRevenue() | number }}</b></span
+      ><span
+        ><small>DESPESA OPERACIONAL MENSAL</small
+        ><b>R$ {{ budgetTotal() * 30 | number }}</b></span
+      ><span
+        ><small>SALDO PROJETADO</small
+        ><b>R$ {{ projectedMonthlyBalance() | number }}</b
+        ><small>{{ financialStatus() }}</small></span
+      >
+    </section>
+    <div id="gabinete" class="grid area-anchor">
+      <section class="panel">
+        <h2>Indicadores da cidade</h2>
+        <div *ngFor="let i of game.indicators" class="indicator">
+          <span>{{ i.label }}</span
+          ><b
+            >{{ i.value | number: "1.1-1" }}
+            <em>{{ i.trend > 0 ? "▲" : i.trend < 0 ? "▼" : "—" }}</em></b
+          >
+          <div class="bar" role="progressbar" [attr.aria-label]="i.label" [attr.aria-valuenow]="i.value" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="i.value"></i></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>
+          Gabinete <small>{{ pendingDecisions() }} pendente(s)</small>
+          <span class="cabinet-nav" *ngIf="pendingDecisions() > 1">
+            <button type="button" aria-label="Decisão pendente anterior" (click)="previousCabinetDecision()">‹</button>
+            <small>{{ cabinetDecisionPosition() + 1 }} / {{ pendingDecisions() }}</small>
+            <button type="button" aria-label="Próxima decisão pendente" (click)="nextCabinetDecision()">›</button>
+          </span>
+        </h2>
+        <div
+          *ngFor="let d of cabinetDisplayDecisions()"
+          class="decision"
+          [id]="'decision-' + d.id"
+          role="article"
+          aria-live="polite"
+          tabindex="-1"
+          [class.resolved]="d.status !== 'PENDING'"
+        >
+          <small
+            >DECISÃO · {{ d.status === "PENDING" ? "PENDENTE" : "RESOLVIDA"
+            }}{{ d.urgency ? " · " + d.urgency : "" }}</small
+          >
+          <h3>{{ d.title }}</h3>
+         <span class="decision-area-badge">{{ decisionArea(d) }}</span>
+          <span *ngIf="d.urgency" class="decision-urgency" [class.high]="d.urgency === 'ALTA'">{{ d.urgency }}</span>
+          <small *ngIf="socialDecisionSummary(d)" class="decision-context-badge">{{ socialDecisionSummary(d) }}</small>
+          <p>{{ d.context }}</p>
+          <div *ngIf="d.status === 'PENDING'" class="actions">
+            <div *ngFor="let o of d.options" class="choice" [attr.aria-label]="'Alternativa: ' + o.label">
+              <h4>{{ o.label }}</h4>
+              <span class="choice-tone" [class.defer]="optionTone(o.id) === 'PRESERVAR / ADIAR'">{{ optionTone(o.id) }}</span>
+              <p *ngIf="o.description" class="choice-description">
+                {{ o.description }}
+              </p>
+              <div *ngIf="optionImpacts(o.id)" class="choice-impact-list">
+                <small *ngFor="let impact of impactItems(o.id)" class="choice-impact"><b>{{ impactKind(impact) }}</b> {{ impact }}</small>
+              </div>
+              <small *ngIf="projectOptionProjection(o.id)" class="choice-impact">{{
+                projectOptionProjection(o.id)
+              }}</small>
+              <small *ngIf="projectOptionForecast(o.id)" class="choice-impact">{{
+                projectOptionForecast(o.id)
+              }}</small>
+              <small *ngIf="optionAffectedGroups(o)" class="choice-impact">
+                Percepção provável: {{ optionAffectedGroups(o) }}
+              </small>
+              <small *ngIf="optionObjectives(o, d)" class="choice-impact">
+                Metas em jogo: {{ optionObjectives(o, d) }}
+              </small>
+              <button [disabled]="onlineBusy" (click)="resolve(d, o.id)">
+                Escolher alternativa
+              </button>
+            </div>
+          </div>
+          <p *ngIf="d.status !== 'PENDING'">Decisão registrada.</p>
+        </div>
+      </section>
+    </div>
+    <div id="cidade" class="grid lower area-anchor">
+      <section class="panel priority-queue" *ngIf="priorityQueue().length">
+        <h2>Fila de prioridades</h2>
+        <p class="panel-note">Leitura do que merece atenção primeiro. A fila não toma decisões pelo gabinete.</p>
+        <div class="priority-item" *ngFor="let item of priorityQueue(); let i = index">
+          <b>{{ i + 1 }}. {{ item.title }}</b>
+          <small>{{ item.type }} · {{ item.reason }}</small>
+          <button type="button" (click)="focusPriority(item)">Ver item</button>
+        </div>
+      </section>
+      <section class="panel groups" *ngIf="game.groups?.length">
+        <h2>Opinião da cidade</h2>
+        <div *ngFor="let group of game.groups" class="group">
+          <span>{{ group.label }}</span
+          ><b>{{ group.satisfaction | number: "1.0-1" }}% <span *ngIf="group.satisfactionTrend" [class.trend-up]="group.satisfactionTrend > 0">{{ group.satisfactionTrend > 0 ? "▲" : "▼" }}</span></b
+          ><small>Principal preocupação: {{ group.concern }}</small>
+          <div class="bar" role="progressbar" [attr.aria-label]="'Satisfação de ' + group.label" [attr.aria-valuenow]="group.satisfaction" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="group.satisfaction"></i></div>
+        </div>
+      </section>
+      <section class="panel" *ngIf="game.secretaries?.length">
+        <h2>Secretarias</h2>
+        <p
+          class="capacity-summary"
+          *ngIf="game.administrativeCapacity !== undefined"
+        >
+          Capacidade administrativa: <b>{{ game.administrativeCapacity }}%</b>
+          <small aria-live="polite">{{ capacityTrend().label }} — {{ capacityTrend().detail }}</small>
+        </p>
+        <div *ngFor="let s of game.secretaries" class="secretary" [id]="'secretary-' + s.key" tabindex="-1">
+          <span>{{ s.label }}</span
+          ><b>{{ secretaryState(s.pressure) }}</b
+          ><small
+            >Eficiência {{ s.efficiency | number: "1.0-0" }} · Pressão
+            {{ s.pressure | number: "1.0-0" }}</small
+          >
+          <small *ngIf="secretaryRecoveryLabel(s.key)" class="secretary-recovery" aria-live="polite">{{ secretaryRecoveryLabel(s.key) }}</small>
+          <small class="secretary-operational">{{ secretaryOperationalLabel(s) }}</small>
+          <div class="bar" role="progressbar" [attr.aria-label]="'Eficiência de ' + s.label" [attr.aria-valuenow]="s.efficiency" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="s.efficiency"></i></div>
+        </div>
+      </section>
+      <section class="panel budget" id="budget-panel" tabindex="-1">
+        <h2>Operação por secretaria</h2>
+        <div *ngFor="let line of game.budget" class="budget-line">
+          <span>{{ line.label }}</span
+          ><b>R$ {{ line.dailyCost | number }}/dia</b>
+        </div>
+      </section>
+      <section class="panel projects" *ngIf="game.projects?.length">
+        <h2>Projetos públicos</h2>
+        <div class="project-controls" aria-label="Filtros do portfólio de projetos">
+          <label>Mostrar
+            <select [(ngModel)]="projectView" (ngModelChange)="persistViewPreferences()">
+              <option value="ALL">Todos</option>
+              <option value="ACTIVE">Em execução</option>
+              <option value="RISK">Em risco</option>
+            </select>
+          </label>
+          <label>Ordenar por
+            <select [(ngModel)]="projectSort" (ngModelChange)="persistViewPreferences()">
+              <option value="PRIORITY">Prioridade e risco</option>
+              <option value="COST">Custo diário</option>
+              <option value="DEADLINE">Prazo restante</option>
+            </select>
+          </label>
+        </div>
+        <p class="panel-note" *ngIf="(game.projects?.length || 0) > 1">
+          {{ game.projects?.length }} frentes no portfólio · R$ {{ activeProjectDailyCost() | number }}/dia em execução. Compare prazo, risco e capacidade antes de abrir novas obras.
+        </p>
+        <p class="panel-note" *ngIf="portfolioSummary().active">
+          Portfólio ativo: {{ portfolioSummary().active }} frente(s) · R$ {{ portfolioSummary().dailyCost | number }}/dia · {{ portfolioSummary().riskCount }} em risco · capacidade comprometida {{ portfolioSummary().capacity | number:'1.1-1' }} · retorno/custo {{ portfolioSummary().returnPerCost | number:'1.1-1' }}.
+          Projeção em 30 dias: R$ {{ portfolioSummary().forecast30 | number }} entre execução e manutenção.
+          <small class="portfolio-forecast-status" [class]="portfolioForecastClass()">{{ portfolioForecastStatus() }}</small>
+        </p>
+        <p class="panel-note" *ngIf="portfolioSummary().active">
+          Estado do portfólio: <b>{{ portfolioStatus().label }}</b> — {{ portfolioStatus().reason }}
+        </p>
+        <div class="project-comparison" *ngIf="comparisonProjects().length > 1" aria-label="Comparação das frentes em execução">
+          <strong>Comparação de frentes · cenário de 30 dias</strong>
+          <div class="comparison-grid">
+            <div *ngFor="let project of comparisonProjects()" class="comparison-card">
+              <b>{{ project.name }}</b>
+              <small>{{ project.area }} · {{ projectOperationalDaysRemaining(project) }} dias operacionais restantes</small>
+              <small>R$ {{ ((project.dailyExecutionCost || 0) + (project.priorityMode === 'PRIORITARIA' ? 5000 : 0)) | number }}/dia</small>
+              <small>Retorno estimado: +{{ projectIndicatorReturn(project) }} no indicador</small>
+              <small>{{ project.priorityMode === 'PRIORITARIA' ? 'Pressão alta' : 'Pressão normal' }}</small>
+              <small><b>Leitura: {{ projectRecommendation(project) }}</b></small>
+            </div>
+          </div>
+        </div>
+        <div *ngFor="let project of visibleProjects()" class="project" [id]="'project-' + project.id" tabindex="-1">
+          <strong>{{ project.name }}</strong
+          ><small
+            >{{ project.area }} ·
+            {{
+              project.status === "COMPLETED" ? "CONCLUÍDO" : "EM EXECUÇÃO"
+            }}</small
+          >
+          <div class="bar">
+            <i [style.width.%]="projectProgress(project)"></i>
+          </div>
+          <span
+            >{{ projectProgress(project) }}% · {{ project.daysCompleted }} de
+            {{ project.daysTotal }} dias</span
+          >
+          <small *ngIf="project.status === 'IN_PROGRESS'"
+            >Prazo estimado: {{ projectDaysRemaining(project) }} dias restantes</small
+          >
+          <small *ngIf="project.status === 'IN_PROGRESS'" class="project-operational-days"
+            >Ritmo atual: {{ projectOperationalDaysRemaining(project) }} dia(s) operacionais restantes</small
+          >
+          <small class="project-scenario">{{ projectScenario(project) }}</small>
+          <small *ngIf="projectSecretaryLabel(project)" class="project-secretary">{{ projectSecretaryLabel(project) }}</small>
+          <small *ngIf="projectGroupLabels(project)">Grupos impactados: {{ projectGroupLabels(project) }}</small>
+          <small *ngIf="project.id === 'social-recovery-project'" class="project-social-origin">Origem: pressão social persistente convertida em agenda de recuperação</small>
+          <small *ngIf="projectProtection(project)" class="project-protection">{{ projectProtection(project) }}</small>
+          <small *ngIf="project.risk === 'DELAYED'" class="project-risk"
+            >⚠ Projeto atrasado por pressão administrativa</small
+          >
+          <small *ngIf="project.dailyExecutionCost"
+            >Custo diário: R$ {{ project.dailyExecutionCost | number }}</small
+          >
+          <small *ngIf="project.status === 'IN_PROGRESS' && project.priorityMode === 'PRIORITARIA'"
+            >Prioridade: acelerada · custo adicional de R$ 5.000/dia</small
+          >
+          <small *ngIf="project.status === 'COMPLETED'"
+            >Manutenção: {{ project.maintenanceMode || "NORMAL" }}</small
+          >
+        </div>
+      </section>
+      <section class="panel narrative-panel news-panel" *ngIf="game.news?.length">
+        <div class="section-heading"><span class="section-kicker">PULSO DA CIDADE</span><h2>Notícias da cidade</h2></div>
+        <div class="feed-list">
+          <article class="feed-item" *ngFor="let item of game.news | slice: 0 : 3">
+            <span class="feed-icon">✦</span><div><small class="feed-type">{{ narrativeType(item) }}</small><p>{{ formatNarrative(item) }}</p></div>
+          </article>
+        </div>
+      </section>
+      <section id="memoria" class="panel narrative-panel memory-panel area-anchor" *ngIf="game.history?.length">
+        <div class="section-heading"><span class="section-kicker">REGISTRO DO MANDATO</span><h2>Memória do governo</h2></div>
+        <div class="feed-list">
+          <article class="feed-item" *ngFor="let item of game.history | slice: 0 : 4">
+            <span class="feed-icon">↳</span><div><small class="feed-type">{{ narrativeType(item) }}</small><p>{{ formatNarrative(item) }}</p></div>
+          </article>
+        </div>
+      </section>
+      <section class="panel narrative-panel legacy-panel" *ngIf="game.legacy?.length">
+        <div class="section-heading"><span class="section-kicker">O QUE FICA</span><h2>Legado institucional</h2></div>
+        <p class="panel-note">Marcos que continuam orientando os próximos ciclos.</p>
+        <div class="feed-list">
+          <article class="feed-item legacy-item" *ngFor="let item of game.legacy | slice: 0 : 3">
+            <span class="feed-icon">◆</span><div><small class="feed-type">MARCO DO MANDATO</small><p>{{ formatNarrative(item) }}</p></div>
+          </article>
+        </div>
+      </section>
+      <section class="panel narrative-panel consequences-panel" *ngIf="recentConsequences().length">
+        <div class="section-heading"><span class="section-kicker">O QUE ESTÁ MUDANDO</span><h2>Consequências em curso</h2></div>
+        <p class="panel-note">Efeitos recentes que continuam influenciando a cidade.</p>
+        <div class="feed-list consequence-list">
+          <p class="feed-item" *ngFor="let item of recentConsequences()"><b>{{ formatDate(item.date) }}</b><span>{{ formatNarrative(item.text) }}</span></p>
+        </div>
+      </section>
+      <section class="panel narrative-panel chain-panel" *ngIf="consequenceChains().length">
+        <div class="section-heading"><span class="section-kicker">CAUSA → RESULTADO</span><h2>Cadeia de efeitos</h2></div>
+        <p class="panel-note">Acompanhe a origem, o resultado medido e o sinal político de cada dia.</p>
+        <div class="consequence-chain" *ngFor="let chain of consequenceChains()" [style.margin-left.px]="chain.depth * 18">
+           <div class="chain-heading"><span class="date-chip">{{ formatDate(chain.date) }}</span><b>{{ formatNarrative(chain.cause) }}</b></div>
+          <small class="chain-effect"><span>{{ formatNarrative(chain.effect) }}</span><em>{{ signalLabel(chain.signal) }}</em></small>
+          <div class="chain-tags" *ngIf="chain.groups || chain.objectives">
+            <span *ngIf="chain.groups">grupos: {{ chain.groups }}</span>
+            <span *ngIf="chain.objectives">meta: {{ chain.objectives }}</span>
+          </div>
+         <details class="chain-details">
+            <summary>Ver contexto do efeito</summary>
+            <small *ngIf="chain.continuation" class="chain-continuation">Desdobramento de uma decisão anterior</small>
+            <small *ngIf="chain.origin" class="chain-origin">{{ chain.origin }}</small>
+            <small *ngIf="chain.groups">Grupos envolvidos: {{ chain.groups }}</small>
+            <small *ngIf="chain.groupImpact">Impacto social registrado: {{ chain.groupImpact }}</small>
+            <small *ngIf="chain.objectives">Metas relacionadas: {{ chain.objectives }}</small>
+          </details>
+        </div>
+      </section>
+      <section class="panel" *ngIf="accumulatedPatterns().length">
+        <h2>Padrões do mandato</h2>
+        <p class="panel-note">Repetições de escolha começam a formar uma orientação de governo.</p>
+        <p *ngFor="let pattern of accumulatedPatterns()"><b>{{ pattern.label }}</b><br /><small>{{ pattern.detail }}</small></p>
+      </section>
+      <section class="panel" *ngIf="planningTransitions().length">
+        <h2>Linha do tempo do planejamento</h2>
+        <p *ngFor="let item of planningTransitions()">{{ formatNarrative(item) }}</p>
+      </section>
+      <section class="panel" *ngIf="planningMilestones().length">
+        <h2>Marcos do governo</h2>
+        <label>Filtrar marcos
+          <select [(ngModel)]="milestoneFilter" (ngModelChange)="changeMilestoneFilter($event)">
+            <option value="ALL">Todos</option>
+            <option value="WORKS">Obras</option>
+            <option value="ADMIN">Administração</option>
+            <option value="FINANCE">Finanças</option>
+            <option value="SOCIETY">Sociedade</option>
+          </select>
+        </label>
+        <p *ngFor="let item of milestonePageItems()">{{ formatNarrative(item) }}</p>
+        <div class="feed-pagination" *ngIf="milestonePageCount() > 1" aria-label="Paginação dos marcos do governo" role="navigation">
+          <button type="button" aria-label="Marcos anteriores" (click)="previousMilestonePage()" [disabled]="milestonePage === 0">Anterior</button>
+          <span>Página {{ milestonePage + 1 }} de {{ milestonePageCount() }}</span>
+          <button type="button" aria-label="Próximos marcos" (click)="nextMilestonePage()" [disabled]="milestonePage >= milestonePageCount() - 1">Próxima</button>
+        </div>
+      </section>
+    </div>
+    <section id="financas" class="panel financial-summary area-anchor">
+      <h2>Evolução financeira</h2>
+      <div class="finance-strip">
+        <span class="finance-card income-card"
+          ><small>ENTRADAS ACUMULADAS</small
+          ><b>R$ {{ ledgerTotal("INCOME") | number }}</b></span
+        ><span class="finance-card expense-card"
+          ><small>DESPESAS ACUMULADAS</small
+          ><b>R$ {{ ledgerTotal("EXPENSE") | number }}</b></span
+        ><span class="finance-card balance-card"
+          ><small>VARIAÇÃO LÍQUIDA</small
+          ><b>R$ {{ netLedger() | number }}</b></span
+        ><span class="finance-card forecast-card"
+          ><small>PROJEÇÃO EM 30 DIAS</small
+          ><b>R$ {{ projectedMonthlyBalance() | number }}</b
+          ><small>{{ financialStatus() }}</small></span
+        >
+      </div>
+      <div class="revenue-sources" *ngIf="game.revenueSources as sources">
+        <small>COMPOSIÇÃO DA ÚLTIMA ARRECADAÇÃO</small>
+        <span
+          >Tributos próprios: <b>R$ {{ sources.ownTaxes | number }}</b></span
+        >
+        <span
+          >Atividade comercial: <b>R$ {{ sources.commerce | number }}</b></span
+        >
+        <span
+          >Transferências: <b>R$ {{ sources.transfers | number }}</b></span
+        >
+      </div>
+      <div class="economic-policies" *ngIf="game.economicPolicies as policies">
+        <small>PROGRAMAS ECONÔMICOS</small>
+        <div class="policy-card" *ngIf="policies.commerceIncentive > 0"><b>Fomento ao comércio</b><span>+{{ policies.commerceIncentive * 2 }}% na receita comercial</span><i><em [style.width.%]="policies.commerceIncentive / 3 * 100"></em></i><small>Nível {{ policies.commerceIncentive }} de 3</small></div>
+        <div class="policy-card" *ngIf="policies.taxModernization > 0"><b>Modernização tributária</b><span>+{{ policies.taxModernization * 2 }}% nos tributos próprios</span><i><em [style.width.%]="policies.taxModernization / 3 * 100"></em></i><small>Nível {{ policies.taxModernization }} de 3</small></div>
+        <span class="no-policy" *ngIf="!policies.commerceIncentive && !policies.taxModernization">Nenhum programa ativo neste momento.</span>
+      </div>
+    </section>
+    <section class="panel ledger" *ngIf="game.ledger?.length">
+      <h2>Livro-caixa recente</h2>
+      <select aria-label="Filtrar lançamentos do Livro-caixa" [(ngModel)]="ledgerFilter">
+        <option value="ALL">Todas</option>
+        <option value="INCOME">Entradas</option>
+        <option value="EXPENSE">Saídas</option>
+      </select>
+      <div class="ledger-feed">
+        <article class="ledger-entry" *ngFor="let entry of filteredLedger()">
+          <span class="ledger-date">{{ formatDate(entry.date) }}</span>
+          <span class="ledger-kind" [class.income]="entry.kind === 'INCOME'">{{ entry.kind === "INCOME" ? "Entrada" : "Saída" }}</span>
+          <strong [class.negative]="entry.kind !== 'INCOME'">{{ entry.kind === "INCOME" ? "+" : "−" }} R$ {{ entry.amount | number }}</strong>
+          <span class="ledger-label">{{ entry.label }}</span>
+          <span class="ledger-bar"><i [style.width.%]="ledgerBar(entry)"></i></span>
+        </article>
+      </div>
+    </section>
+    <section class="panel timeline" *ngIf="ledgerTimeline().length">
+      <h2>Caixa por dia</h2>
+      <div *ngFor="let day of ledgerTimeline()" class="timeline-row">
+        <span>{{ formatDate(day.date) }}</span
+        ><b [class.negative]="day.net < 0"
+          >{{ day.net >= 0 ? "+" : "" }} R$ {{ day.net | number }}</b
+        >
+        <div class="bar"><i [style.width.%]="timelineBar(day.net)"></i></div>
+      </div>
+    </section>
+    <section class="panel treasury-delta">
+      <h2>Caixa desde o início</h2>
+      <strong
+        >{{ treasuryDelta() >= 0 ? "+" : "" }} R$
+        {{ treasuryDelta() | number }}</strong
+      >
+    </section>
+    <section class="panel category-summary">
+      <h2>Despesas por categoria</h2>
+      <div class="category-cards">
+        <article><span>Operação</span><b>R$ {{ categoryTotal("OPERATION") | number }}</b><i><em [style.width.%]="categoryShare('OPERATION')"></em></i><small>{{ categoryShare('OPERATION') | number:'1.0-0' }}% do total</small></article>
+        <article><span>Decisões</span><b>R$ {{ categoryTotal("DECISION") | number }}</b><i><em [style.width.%]="categoryShare('DECISION')"></em></i><small>{{ categoryShare('DECISION') | number:'1.0-0' }}% do total</small></article>
+        <article><span>Projetos</span><b>R$ {{ categoryTotal("PROJECT") | number }}</b><i><em [style.width.%]="categoryShare('PROJECT')"></em></i><small>{{ categoryShare('PROJECT') | number:'1.0-0' }}% do total</small></article>
+      </div>
+    </section>
+    <section class="panel budget-controls">
+      <h2>Ajuste de orçamento</h2>
+      <p>Altere a verba diária e observe o impacto no saldo projetado.</p>
+      <div *ngFor="let line of game.budget" class="budget-line">
+        <span class="budget-label"
+          >{{ line.label }} <small>{{ budgetImpact(line.key) }}</small><small class="budget-preview">− {{ budgetPreview(line.key, -500) }} · + {{ budgetPreview(line.key, 500) }}</small></span
+        ><button [attr.aria-label]="'Reduzir verba de ' + line.label" (click)="adjustBudget(line.key, -500)">−</button
+        ><b>R$ {{ line.dailyCost | number }}</b
+        ><button [attr.aria-label]="'Aumentar verba de ' + line.label" (click)="adjustBudget(line.key, 500)">+</button>
+      </div>
+    </section>
+    <section class="panel final-report" *ngIf="game.evaluation">
+      <h2>Relatório do primeiro ciclo</h2>
+      <div>
+        <strong>Metas concluídas</strong>
+        <p *ngFor="let objective of objectivesByStatus('COMPLETED')">
+          ✓ {{ objective.label }} — {{ objective.current | number: "1.0-1" }} /
+          {{ objective.target | number: "1.0-1" }}
+        </p>
+        <p *ngIf="!objectivesByStatus('COMPLETED').length">
+          Nenhuma meta foi concluída.
+        </p>
+      </div>
+      <div>
+        <strong>Metas não alcançadas</strong>
+        <p *ngFor="let objective of objectivesByStatus('FAILED')">
+          × {{ objective.label }} — {{ objective.current | number: "1.0-1" }} /
+          {{ objective.target | number: "1.0-1" }}
+        </p>
+        <p *ngIf="!objectivesByStatus('FAILED').length">
+          Todas as metas foram alcançadas.
+        </p>
+      </div>
+    </section>
+    <section class="panel population-panel">
+      <span class="section-kicker">CIDADE VIVA</span><h2>Movimento da cidade</h2>
+      <div class="population-hero"><strong>{{ game.population | number }}</strong><span>habitantes</span></div>
+      <div class="population-direction" [class.growing]="(game.populationTrend ?? 0) > 0" [class.declining]="(game.populationTrend ?? 0) < 0">
+      <p *ngIf="(game.populationTrend ?? 0) > 0">
+        ▲ Crescimento diário de {{ game.populationTrend ?? 0 }} habitantes
+      </p>
+      <p *ngIf="(game.populationTrend ?? 0) < 0">
+        ▼ Redução diária de {{ -(game.populationTrend ?? 0) }} habitantes
+      </p>
+      <p *ngIf="!(game.populationTrend ?? 0)">— População estável</p>
+      </div>
+    </section>
+    <section class="panel decision-index" *ngIf="game.decisions.length">
+      <h2>Mapa de decisões</h2>
+      <div
+        *ngFor="let d of game.decisions | slice: 0 : 6"
+        class="decision-index-row"
+      >
+        <span>{{ d.title }}</span
+        ><small
+          >{{ d.category || decisionCategory(d.id) }} · prioridade
+          {{ d.urgency || decisionUrgency(d.id) }} ·
+          {{ d.status === "PENDING" ? "aguardando" : "resolvida" }}</small
+        >
+      </div>
+    </section>
+    <section class="panel decision-history" *ngIf="game.decisions.length">
+      <h2>Registro do gabinete</h2>
+      <p *ngFor="let d of decisionHistoryPageItems()">
+        <strong>{{ d.status === "PENDING" ? "Pendente" : "Resolvida" }}</strong>
+        — {{ d.title }}<small>{{ decisionChoice(d) }}</small>
+      </p>
+      <div class="feed-pagination" *ngIf="decisionHistoryPageCount() > 1" aria-label="Paginação do Registro do gabinete" role="navigation">
+        <button type="button" aria-label="Ir para a página anterior do Registro do gabinete" (click)="previousDecisionHistoryPage()" [disabled]="decisionHistoryPage === 0">Anterior</button>
+        <span>Página {{ decisionHistoryPage + 1 }} de {{ decisionHistoryPageCount() }}</span>
+        <button type="button" aria-label="Ir para a próxima página do Registro do gabinete" (click)="nextDecisionHistoryPage()" [disabled]="decisionHistoryPage >= decisionHistoryPageCount() - 1">Próxima</button>
+      </div>
+    </section>
+    <section class="panel decision-dates" *ngIf="resolvedDecisionDates().length">
+      <h2>Datas das decisões</h2>
+      <p
+        *ngFor="let d of resolvedDecisionDates()"
+      >
+        <small>{{ formatDate(d.resolvedDate) }}</small> — {{ d.title }}
+      </p>
+    </section>
+    <section class="panel decision-finance" *ngIf="game.decisions.length">
+      <h2>Impacto financeiro das decisões</h2>
+      <p *ngFor="let d of game.decisions | slice: 0 : 8">
+        <strong>{{ d.title }}</strong
+        ><small>{{
+          decisionCost(d)
+            ? "Despesa registrada: R$ " + (decisionCost(d) | number)
+            : "Sem despesa registrada"
+        }}</small>
+      </p>
+    </section>
+    <section class="panel evaluation-metrics" *ngIf="game.evaluation">
+      <h2>Indicadores do resultado</h2>
+      <div class="metric-grid">
+        <span
+          >Qualidade dos serviços
+          <b>{{ game.evaluation.serviceQuality }}%</b></span
+        ><span
+          >Eficiência administrativa
+          <b>{{ game.evaluation.administrativeEfficiency }}%</b></span
+        ><span
+          >Estabilidade fiscal
+          <b>{{ game.evaluation.fiscalStability }}%</b></span
+        ><span
+          >Confiança social <b>{{ game.evaluation.socialTrust }}%</b></span
+        >
+      </div>
+      <div class="evaluation-deltas">
+        <span>Variação da aprovação <b [class.negative-delta]="(game.evaluation.approvalDelta || 0) < 0" [class.positive-delta]="(game.evaluation.approvalDelta || 0) > 0">{{ game.evaluation.approvalDelta | number: "1.1-1" }} p.p.</b></span>
+        <span>Variação dos serviços <b [class.negative-delta]="(game.evaluation.serviceQualityDelta || 0) < 0" [class.positive-delta]="(game.evaluation.serviceQualityDelta || 0) > 0">{{ game.evaluation.serviceQualityDelta | number: "1.1-1" }} p.p.</b></span>
+        <span>Variação do caixa <b [class.negative-delta]="(game.evaluation.treasuryDelta || 0) < 0" [class.positive-delta]="(game.evaluation.treasuryDelta || 0) > 0">R$ {{ game.evaluation.treasuryDelta | number }}</b></span>
+      </div>
+    </section>
+    <section class="panel live-metrics">
+      <h2>Saúde atual do governo</h2>
+      <div class="metric-grid">
+        <span
+          >Serviços <b>{{ serviceQuality() }}%</b></span
+        ><span
+          >Administração <b>{{ administrativeEfficiency() }}%</b></span
+        ><span
+          >Fiscal <b>{{ fiscalStability() }}%</b></span
+        ><span
+          >Confiança <b>{{ socialTrust() }}%</b></span
+        >
+      </div>
+    </section>
+    <section class="panel reputation-panel" *ngIf="game.groups?.length">
+      <h2>Confiança por grupo</h2>
+      <p *ngFor="let group of game.groups">
+        <span>{{ group.label }}</span> · Agora
+        <b>{{ group.satisfaction | number: "1.0-1" }}%</b> · Histórico
+        <b>{{ group.reputation ?? group.satisfaction | number: "1.0-1" }}%</b>
+      </p>
+    </section>
+    <section class="panel trend-panel">
+      <h2>Tendências</h2>
+      <div class="metric-grid">
+        <span
+          >Serviços <b>{{ metricTrend("services") }}</b></span
+        ><span
+          >Administração <b>{{ metricTrend("administration") }}</b></span
+        ><span
+          >Fiscal <b>{{ metricTrend("fiscal") }}</b></span
+        ><span
+          >Confiança <b>{{ metricTrend("trust") }}</b></span
+        >
+      </div>
+    </section>
+    <section class="panel temporary-effects" *ngIf="temporaryEffects().length">
+      <h2>Políticas em efeito</h2>
+      <p *ngFor="let effect of temporaryEffects()">
+        <span>{{ effect.label }}</span>
+        <b [class.negative-effect]="effect.value < 0"
+          >{{ effect.value > 0 ? "+" : ""
+          }}{{ effect.value | number: "1.1-1" }}</b
+        >
+        <small>impacto temporário</small>
+      </p>
+    </section>
+    <section class="panel timeline-panel" *ngIf="recentSnapshots().length">
+      <h2>Linha do tempo do governo</h2>
+      <div *ngFor="let snapshot of recentSnapshots()" class="snapshot">
+        <small>{{ formatDate(snapshot.date) }}</small
+        ><span
+          >Aprovação {{ snapshot.approval | number: "1.1-1" }}% · Serviços
+          {{ snapshot.serviceQuality }}%</span
+        >
+        <div class="snapshot-bars">
+          <i
+            class="approval-bar"
+            [style.width.%]="snapshotBar(snapshot.approval)"
+          ></i
+          ><i
+            class="service-bar"
+            [style.width.%]="snapshotBar(snapshot.serviceQuality)"
+          ></i>
+        </div>
+      </div>
+    </section>
+   <section class="panel snapshot-deltas" *ngIf="recentSnapshots().length > 1">
+      <span class="section-kicker">DETALHE HISTÓRICO</span>
+      <h2>Variação desde o dia anterior</h2>
+      <div class="delta-row" *ngFor="let snapshot of recentSnapshots() | slice: -5">
+        <small>{{ formatDate(snapshot.date) }}</small>
+        <span>Aprovação <b>{{ snapshotDelta(snapshot, "approval") }}</b></span>
+        <span>Serviços <b>{{ snapshotDelta(snapshot, "serviceQuality") }}</b></span>
+      </div>
+    </section>
+   <section class="panel history-matrix" *ngIf="recentSnapshots().length">
+      <span class="section-kicker">DETALHE HISTÓRICO</span>
+      <h2>Resumo histórico</h2>
+      <div
+        *ngFor="let snapshot of recentSnapshots() | slice: -5"
+        class="history-row"
+      >
+        <small>{{ formatDate(snapshot.date) }}</small
+        ><span class="history-metrics"
+          ><span>Serviços <b>{{ snapshot.serviceQuality }}%</b></span
+          ><span>Administração <b>{{ percentageOrDash(snapshot.administrativeEfficiency) }}</b></span
+          ><span>Fiscal <b>{{ percentageOrDash(snapshot.fiscalStability) }}</b></span
+          ><span>Confiança <b>{{ percentageOrDash(snapshot.socialTrust) }}</b></span></span
+        >
+      </div>
+    </section>
+   <section class="panel trajectory-panel" *ngIf="recentSnapshots().length">
+     <span class="section-kicker">PAINEL DE DECISÃO</span><h2>Leitura estratégica</h2>
+      <div class="strategy-layout">
+     <p class="trajectory-summary" [class]="governmentTrajectory().className">
+        <b>{{ governmentTrajectory().label }}</b>
+        <span>{{ governmentTrajectory().detail }}</span>
+      </p>
+      <p class="trajectory-recommendation"><b>{{ trajectoryRecommendation().title }}</b><span>{{ trajectoryRecommendation().detail }}</span></p>
+      <p *ngIf="game.activeFocus" class="trajectory-focus"><b>Foco atual:</b> {{ game.activeFocus }} · {{ game.focusDaysRemaining }} dia(s) restante(s)</p>
+     <button *ngIf="!game.activeFocus" type="button" [disabled]="onlineBusy" (click)="adoptTrajectoryFocus()">Adotar como foco por 7 dias</button>
+      </div>
+    </section>
+    <div class="turn-action" *ngIf="!game.evaluation">
+      <div><span class="section-kicker">PRÓXIMO TURNO</span><strong>Pronto para atualizar o governo?</strong><small>Avance um dia e veja as consequências das suas escolhas.</small></div>
+      <button class="advance" [disabled]="onlineBusy" (click)="advance()">Avançar 1 dia <span>→</span></button>
+    </div>
+  </ng-container>
+</main>
