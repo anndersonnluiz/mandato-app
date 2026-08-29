@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 
 type Game = SimulationState & {
@@ -352,12 +352,7 @@ export class AppComponent {
       if (!this.game.projects.some((project) => project.id === 'social-recovery-project')) this.game.projects.push({ id: 'social-recovery-project', name, area, totalCost: 240000, dailyExecutionCost: 10000, maintenanceCost: 1800, dailyIndicatorEffects: { [({ Infraestrutura: 'infrastructure', Saúde: 'health', Educação: 'education', Transporte: 'transport' } as Record<string, string>)[area] ?? 'infrastructure']: 0.04 }, dailyGroupEffects: { [candidate?.key ?? 'residents']: 0.04 }, daysTotal: 6, daysCompleted: 0, status: 'IN_PROGRESS' });
       this.game.treasury -= 240000;
     }
-    if (optionId === 'reorganize-secretariat') {
-      this.game.secretaries?.forEach((secretary) => {
-        secretary.pressure = Math.max(0, secretary.pressure - 8);
-        secretary.efficiency = Math.min(100, secretary.efficiency + 3);
-      });
-    }
+    applySharedAdministrativeDecision(this.game as any, optionId);
     if (optionId.startsWith('stabilize-') && optionId.endsWith('-demand')) {
       const secretaryKey = optionId.replace('stabilize-', '').replace('-demand', '');
       this.game.secretaryRecoveryDays ??= {};
