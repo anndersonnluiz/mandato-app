@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyIndicatorEffects as applySharedIndicatorEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyIndicatorEffects as applySharedIndicatorEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, applyActiveGroupEffects as applySharedActiveGroupEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -891,15 +891,7 @@ export class SimulationEngine {
     applySharedTemporaryEffects(state as any);
   }
   private applyActiveGroupEffects(state: SimulationState) {
-    const active = state.activeGroupEffects ?? {};
-    for (const [key, raw] of Object.entries(active)) {
-      const group = state.groups?.find((item) => item.key === key);
-      if (group) {
-        group.satisfactionTrend = Number(raw);
-        group.satisfaction = Math.max(0, Math.min(100, group.satisfaction + Number(raw)));
-      }
-    }
-    state.activeGroupEffects = Object.fromEntries(Object.entries(active).map(([key, value]) => [key, Math.abs(Number(value) * 0.75) < 0.01 ? 0 : Number(value) * 0.75]));
+    applySharedActiveGroupEffects(state as any);
   }
   private applyFocusBonus(state: SimulationState) {
     applySharedFocusBonus(state as any);
