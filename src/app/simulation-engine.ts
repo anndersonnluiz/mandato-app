@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyIndicatorEffects as applySharedIndicatorEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, applyActiveGroupEffects as applySharedActiveGroupEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation, updateOperationalState as updateSharedOperationalState } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyIndicatorEffects as applySharedIndicatorEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, applyActiveGroupEffects as applySharedActiveGroupEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation, updateOperationalState as updateSharedOperationalState, updateFiscalState as updateSharedFiscalState } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -257,12 +257,7 @@ export class SimulationEngine {
       state.dailyOperatingCost ??
       18000;
     state.treasury -= operatingCost;
-    const runwayDays = operatingCost > 0 ? state.treasury / operatingCost : 0;
-    const debtBurden = Math.min(40, (state.debt ?? 120000000) / 10000000);
-    state.fiscalStability = Math.max(
-      0,
-      Math.min(100, Math.round(Math.min(100, runwayDays / 3) - debtBurden)),
-    );
+    updateSharedFiscalState(state as any);
     state.ledger ??= [];
     for (const project of state.projects ?? []) {
       project.maintenanceMode ??= 'NORMAL';
@@ -305,8 +300,6 @@ export class SimulationEngine {
       }
     }
     if (state.treasury < 0) {
-      state.fiscalAlert =
-        'O caixa está negativo. Novas despesas exigem contenção e podem reduzir a aprovação.';
       state.approval = this.clamp(state.approval - 0.2);
       if (!state.news.some((item) => item.includes('caixa está negativo')))
         state.news.unshift(`Crise fiscal: ${state.fiscalAlert}`);
