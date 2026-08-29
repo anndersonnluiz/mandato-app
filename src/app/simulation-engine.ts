@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -835,12 +835,7 @@ export class SimulationEngine {
     indicator.trend = change;
   }
   private updateGroupReputation(state: SimulationState) {
-    for (const group of state.groups ?? []) {
-      group.reputation ??= group.satisfaction;
-      group.reputation = this.clamp(
-        group.reputation + (group.satisfaction - group.reputation) * 0.12,
-      );
-    }
+    updateSharedGroupReputation(state as any);
   }
   private updateGroupConcerns(state: SimulationState) {
     const concerns: Record<string, string[]> = {
