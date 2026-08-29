@@ -558,7 +558,6 @@ export class SimulationEngine {
       state.population = Math.max(0, state.population + state.populationTrend);
     }
     this.createPopulationBulletin(state);
-    this.applyBudgetQuality(state);
     this.applyEconomicPolicyEffects(state);
     this.updateAdministrativeCapacity(state);
     this.createHealthSecretaryDemand(state);
