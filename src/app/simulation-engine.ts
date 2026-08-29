@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -912,15 +912,7 @@ export class SimulationEngine {
     state.activeGroupEffects = Object.fromEntries(Object.entries(active).map(([key, value]) => [key, Math.abs(Number(value) * 0.75) < 0.01 ? 0 : Number(value) * 0.75]));
   }
   private applyFocusBonus(state: SimulationState) {
-    if ((state.focusDaysRemaining ?? 0) <= 0) return;
-    if (state.focusMetric === 'service') {
-      const weakest = [...state.indicators].sort((a, b) => a.value - b.value)[0];
-      if (weakest) weakest.value = this.clamp(weakest.value + 0.05);
-    } else if (state.focusMetric === 'capacity') {
-      for (const secretary of state.secretaries ?? []) secretary.pressure = this.clamp(secretary.pressure - 0.2);
-    } else if (state.focusMetric === 'social') {
-      for (const group of state.groups ?? []) group.satisfaction = this.clamp(group.satisfaction + 0.1);
-    }
+    applySharedFocusBonus(state as any);
   }
   private createSecretaryDecisions(state: SimulationState) {
     createSharedSecretaryDecisions(state as any);
