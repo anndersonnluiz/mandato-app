@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse } from '@mandato/engine';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -498,14 +498,9 @@ export class AppComponent {
       );
     }
     if (optionId === 'contain-expenses') {
-      this.game.budget?.forEach(
-        (line) =>
-          (line.dailyCost = Math.max(0, Math.round(line.dailyCost * 0.95))),
-      );
-      this.game.approval = Math.max(0, this.game.approval - 0.3);
+      applySharedFiscalResponse(this.game as any, optionId);
     }
-    if (optionId === 'maintain-spending')
-      this.game.approval = Math.max(0, this.game.approval - 0.15);
+    if (optionId === 'maintain-spending') applySharedFiscalResponse(this.game as any, optionId);
     if (optionId === 'amortize-debt' && this.game.treasury >= 2000000) {
       this.game.treasury -= 2000000;
       this.game.debt = Math.max(0, (this.game.debt ?? 120000000) - 10000000);
