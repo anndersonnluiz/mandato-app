@@ -8,9 +8,9 @@ export class LocalEngineSession {
   private readonly session = new GameSession(this.repository, new MandatoEngine());
 
   async dispatch(state: SimulationState, command: Parameters<MandatoEngine['execute']>[1]): Promise<SimulationState> {
-    const normalized = migrateGameState(state) as SimulationState;
+    const normalized = migrateGameState(state) as unknown as SimulationState & { id: string };
     await this.repository.save(normalized as any);
     const result = await this.session.dispatch(normalized.id, command);
-    return result as SimulationState;
+    return result as unknown as SimulationState;
   }
 }

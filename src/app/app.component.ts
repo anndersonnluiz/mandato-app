@@ -15,6 +15,7 @@ import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
 import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse } from '@mandato/engine';
+import { LocalEngineSession } from './local-engine-session';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -54,6 +55,7 @@ export class AppComponent {
   milestoneFilter: 'ALL' | 'WORKS' | 'ADMIN' | 'FINANCE' | 'SOCIETY' = (localStorage.getItem('mandato-milestone-filter') as 'ALL' | 'WORKS' | 'ADMIN' | 'FINANCE' | 'SOCIETY') || 'ALL';
   milestonePage = 0;
   private readonly engine = new SimulationEngine();
+  private readonly sharedLocalSession = new LocalEngineSession();
   private readonly repository = new LocalGameRepository();
   private readonly http = inject(HttpClient, { optional: true });
   private readonly api = this.http ? new ApiGameRepository(this.http) : null;
@@ -1124,10 +1126,17 @@ export class AppComponent {
       });
       return;
     }
-    const result = this.engine.advanceDay(this.game);
-    this.game = result.state as Game;
-    this.feedback = result.report;
-    this.save();
+    this.sharedLocalSession.dispatch(this.game, { type: 'ADVANCE_DAY' }).then((state) => {
+      this.game = state as Game;
+      this.feedback = 'O Simulation Engine compartilhado processou os efeitos da decisão.';
+      this.save();
+    }).catch(() => {
+      // Partidas antigas podem não ter todos os campos do contrato novo.
+      const result = this.engine.advanceDay(this.game!);
+      this.game = result.state as Game;
+      this.feedback = result.report;
+      this.save();
+    });
   }
   retryOnlineAction() {
     const action = this.pendingOnlineAction;
