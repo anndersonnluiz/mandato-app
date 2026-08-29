@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -980,44 +980,7 @@ export class SimulationEngine {
     }
   }
   private createSecretaryDecisions(state: SimulationState) {
-    for (const secretary of state.secretaries ?? []) {
-      if (secretary.pressure < 80) continue;
-      const id = `capacity-${secretary.key}`;
-      if (state.decisions.some((decision) => decision.id === id)) continue;
-      const activeProjects = (state.projects ?? []).filter((project) => project.status === 'IN_PROGRESS');
-      const portfolioCost = activeProjects.reduce((sum, project) => sum + (project.dailyExecutionCost ?? 0), 0);
-      const portfolioText = activeProjects.length ? ` Há ${activeProjects.length} obra(s) em execução, consumindo R$ ${portfolioCost.toLocaleString('pt-BR')} por dia.` : '';
-      state.decisions.push({
-        id,
-        createdDate: state.currentDate,
-        title: `Capacidade crítica na secretaria de ${secretary.label.toLowerCase()}`,
-        context: `A equipe de ${secretary.label.toLowerCase()} está operando sob pressão elevada. A secretaria pede uma decisão de gestão antes que a eficiência continue caindo.${portfolioText}`,
-        category: 'ADMINISTRATIVA',
-        urgency: 'ALTA',
-        status: 'PENDING',
-        options: [
-          {
-            id: `reorganize-${secretary.key}`,
-            label: 'Reorganizar a operação',
-            description:
-              'Reduz a pressão e recupera eficiência, mas desloca servidores de outras tarefas.',
-            groupEffects: { workers: 0.8 },
-          },
-          {
-            id: `maintain-${secretary.key}`,
-            label: 'Manter a estrutura atual',
-            description: 'Evita mudança imediata, mas a sobrecarga continua.',
-            groupEffects: { workers: -1 },
-          },
-        ],
-      });
-      state.news.unshift(
-        `Alerta: a secretaria de ${secretary.label.toLowerCase()} pede uma decisão de capacidade.`,
-      );
-      state.history.unshift(
-        `${state.currentDate}: A secretaria de ${secretary.label.toLowerCase()} solicitou reorganização operacional.`,
-      );
-    }
+    createSharedSecretaryDecisions(state as any);
   }
   private applyEconomicPolicyEffects(state: SimulationState) {
     const policy = state.economicPolicies;
