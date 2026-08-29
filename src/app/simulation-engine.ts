@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyIndicatorEffects as applySharedIndicatorEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, applyActiveGroupEffects as applySharedActiveGroupEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyIndicatorEffects as applySharedIndicatorEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, applyActiveGroupEffects as applySharedActiveGroupEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation, updateOperationalState as updateSharedOperationalState } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -284,40 +284,19 @@ export class SimulationEngine {
       category: 'OPERATION',
     });
     state.administrativeAlerts ??= [];
-    const baselineBudget: Record<string, number> = {
-      health: 6000,
-      education: 5000,
-      infrastructure: 3000,
-      transport: 2500,
-      security: 1500,
-    };
+    const completingRecovery = new Set(
+      Object.entries(state.secretaryRecoveryDays ?? {})
+        .filter(([, days]) => days === 1)
+        .map(([key]) => key),
+    );
+    updateSharedOperationalState(state as any);
     for (const secretary of state.secretaries ?? []) {
-      const budgetLine = state.budget?.find(
-        (line) => line.key === secretary.key,
-      );
-      const baseline = baselineBudget[secretary.key] ?? 1;
-      const budgetRatio = budgetLine ? budgetLine.dailyCost / baseline : 1;
-      secretary.pressure = Math.max(
-        0,
-        secretary.pressure - 0.1 + (1 - budgetRatio) * 0.5,
-      );
-      state.secretaryRecoveryDays ??= {};
-      const recoveryDays = state.secretaryRecoveryDays[secretary.key] ?? 0;
-      if (recoveryDays > 0) {
-        secretary.pressure = Math.max(0, secretary.pressure - 0.5);
-        state.secretaryRecoveryDays[secretary.key] = recoveryDays - 1;
-        if (recoveryDays === 1) {
-          const message = `${secretary.label} concluiu a recuperação operacional e voltou a trabalhar sem o reforço temporário.`;
-          state.news.unshift(message);
-          state.history.unshift(`${state.currentDate}: ${message}`);
-        }
+      if (completingRecovery.has(secretary.key)) {
+        const message = `${secretary.label} concluiu a recuperação operacional e voltou a trabalhar sem o reforço temporário.`;
+        state.news.unshift(message);
+        state.history.unshift(`${state.currentDate}: ${message}`);
       }
-      secretary.efficiency = Math.max(
-        0,
-        Math.min(100, secretary.efficiency + (budgetRatio - 1) * 0.15),
-      );
       if (secretary.pressure > 75) {
-        secretary.efficiency = Math.max(0, secretary.efficiency - 0.1);
         const alert = `${secretary.label} está sobrecarregada e perdeu eficiência.`;
         if (!state.administrativeAlerts.includes(alert)) {
           state.administrativeAlerts.unshift(alert);
