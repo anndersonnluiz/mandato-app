@@ -7,6 +7,12 @@ export class LocalEngineSession {
   private readonly repository = new LocalEngineStateRepository();
   private readonly session = new GameSession(this.repository, new MandatoEngine());
 
+  /** Executes a domain command synchronously; persistence remains an explicit concern. */
+  execute(state: SimulationState, command: Parameters<MandatoEngine['execute']>[1]): SimulationState {
+    const normalized = migrateGameState(state) as unknown as SimulationState & { id: string };
+    return new MandatoEngine().execute(normalized as any, command) as unknown as SimulationState;
+  }
+
   async dispatch(state: SimulationState, command: Parameters<MandatoEngine['execute']>[1]): Promise<SimulationState> {
     const normalized = migrateGameState(state) as unknown as SimulationState & { id: string };
     await this.repository.save(normalized as any);
