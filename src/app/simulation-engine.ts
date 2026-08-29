@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -863,40 +863,7 @@ export class SimulationEngine {
     applySharedSecretaryRecovery(state as any);
   }
   private escalatePendingEmergencies(state: SimulationState) {
-    const today = Date.parse(`${state.currentDate}T00:00:00Z`);
-    for (const decision of state.decisions) {
-      if (
-        !decision.id.startsWith('critical-') ||
-        decision.status !== 'PENDING' ||
-        decision.escalationApplied ||
-        !decision.createdDate
-      )
-        continue;
-      const age = Math.floor(
-        (today - Date.parse(`${decision.createdDate}T00:00:00Z`)) / 86400000,
-      );
-      if (age < 3) continue;
-      const key = decision.id.replace('critical-', '');
-      const indicator = state.indicators.find((item) => item.key === key);
-      const groupKey: Record<string, string> = {
-        health: 'families',
-        education: 'families',
-        infrastructure: 'residents',
-        transport: 'business',
-        security: 'residents',
-      };
-      const group = state.groups?.find((item) => item.key === groupKey[key]);
-      if (indicator) indicator.value = this.clamp(indicator.value - 2);
-      if (group) group.satisfaction = this.clamp(group.satisfaction - 1);
-      state.news.unshift(
-        `Agravamento: a resposta para ${indicator?.label?.toLowerCase() ?? key} foi adiada por vários dias.`,
-      );
-      state.administrativeAlerts ??= [];
-      state.administrativeAlerts.unshift(
-        `A crise de ${indicator?.label?.toLowerCase() ?? key} se agravou por falta de decisão.`,
-      );
-      decision.escalationApplied = true;
-    }
+    escalateSharedCriticalDecisions(state as any);
   }
   private apply(
     state: SimulationState,
