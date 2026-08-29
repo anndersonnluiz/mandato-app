@@ -420,7 +420,6 @@ export class AppComponent {
         category: 'DECISION',
       });
     }
-    applySharedDecisionSocialEffects(this.game as any, optionId, option?.groupEffects, true, false, false);
     if (decision.id.startsWith('social-reaction-')) {
       const constructive = optionId.startsWith('meet-');
       this.game.approval = Math.max(0, Math.min(100, this.game.approval + (constructive ? 0.25 : -0.35)));
@@ -447,41 +446,7 @@ export class AppComponent {
         pressure: 58,
       },
     ];
-    const secretaryByOption: Record<string, string> = {
-      hire: 'health',
-      deny: 'health',
-      'emergency-health': 'health',
-      'manage-crisis': 'health',
-      meals: 'education',
-      'review-meals': 'education',
-      bus: 'transport',
-      wait: 'transport',
-      'negotiate-bus': 'transport',
-      'accept-bus': 'transport',
-      lighting: 'security',
-      'defer-lighting': 'security',
-    };
-    const secretary = this.game.secretaries?.find(
-      (item) => item.key === secretaryByOption[optionId],
-    );
-    if (secretary) {
-      const constructive = ![
-        'deny',
-        'wait',
-        'review-meals',
-        'defer-lighting',
-        'manage-crisis',
-        'accept-bus',
-      ].includes(optionId);
-      secretary.pressure = Math.max(
-        0,
-        Math.min(100, secretary.pressure + (constructive ? -2 : 2)),
-      );
-      secretary.efficiency = Math.max(
-        0,
-        Math.min(100, secretary.efficiency + (constructive ? 0.4 : -0.6)),
-      );
-    }
+    applySharedDecisionSocialEffects(this.game as any, optionId, option?.groupEffects, true, true, false);
     if (optionId === 'contain-expenses') {
       applySharedFiscalResponse(this.game as any, optionId);
     }
