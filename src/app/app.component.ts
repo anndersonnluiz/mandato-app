@@ -411,9 +411,6 @@ export class AppComponent {
     }
     this.game.projects ??= [];
     this.game.causalLinks ??= [];
-    this.game.activeGroupEffects ??= {};
-    for (const [group, value] of Object.entries(option?.groupEffects ?? {}))
-      this.game.activeGroupEffects[group] = (this.game.activeGroupEffects[group] ?? 0) + Number(value) * 0.2;
     const causalText = `${optionId} ${decision.title}`.toLowerCase();
     const objectiveIds = [
       /saúde|hospital|health/.test(causalText) ? 'health' : '', /educa|escola|merenda/.test(causalText) ? 'education' : '',
