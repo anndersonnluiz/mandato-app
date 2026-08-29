@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1076,46 +1076,7 @@ export class SimulationEngine {
         option.groupEffects[groupKey] = option.groupEffects[groupKey]! * factor;
   }
   private applySecretaryDecisions(state: SimulationState) {
-    for (const decision of state.decisions) {
-      if (
-        !decision.id.startsWith('capacity-') ||
-        decision.status !== 'RESOLVED' ||
-        decision.applied
-      )
-        continue;
-      const secretary = state.secretaries?.find(
-        (item) => `capacity-${item.key}` === decision.id,
-      );
-      if (secretary) {
-        const reorganized = decision.chosenOptionId?.startsWith('reorganize-');
-        secretary.pressure = Math.max(
-          0,
-          secretary.pressure - (reorganized ? 15 : 0),
-        );
-        secretary.efficiency = this.clamp(
-          secretary.efficiency + (reorganized ? 4 : -2),
-        );
-        if (reorganized) {
-          const cost = 50000;
-          state.treasury -= cost;
-          state.ledger ??= [];
-          state.ledger.unshift({
-            date: state.currentDate,
-            label: `Reorganização: ${secretary.label}`,
-            amount: cost,
-            kind: 'EXPENSE',
-            category: 'DECISION',
-          });
-          for (const project of state.projects ?? []) {
-            if (project.status === 'IN_PROGRESS' && project.risk === 'DELAYED') project.risk = 'NORMAL';
-          }
-        }
-        state.history.unshift(
-          `${state.currentDate}: ${secretary.label} ${reorganized ? 'reorganizou a operação e recuperou capacidade' : 'manteve a estrutura apesar da sobrecarga'}.`,
-        );
-      }
-      decision.applied = true;
-    }
+    applySharedSecretaryResponses(state as any);
   }
   private applyOperationalReviews(state: SimulationState) {
     applySharedOperationalReviews(state as any);
