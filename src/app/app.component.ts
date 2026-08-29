@@ -1126,17 +1126,12 @@ export class AppComponent {
       });
       return;
     }
-    this.sharedLocalSession.dispatch(this.game, { type: 'ADVANCE_DAY' }).then((state) => {
-      this.game = state as Game;
-      this.feedback = 'O Simulation Engine compartilhado processou os efeitos da decisão.';
-      this.save();
-    }).catch(() => {
-      // Partidas antigas podem não ter todos os campos do contrato novo.
-      const result = this.engine.advanceDay(this.game!);
-      this.game = result.state as Game;
-      this.feedback = result.report;
-      this.save();
-    });
+    // O pipeline compartilhado será ativado após a paridade dos efeitos
+    // enriquecidos; até lá, preservamos o comportamento completo das partidas.
+    const result = this.engine.advanceDay(this.game);
+    this.game = result.state as Game;
+    this.feedback = result.report;
+    this.save();
   }
   retryOnlineAction() {
     const action = this.pendingOnlineAction;
