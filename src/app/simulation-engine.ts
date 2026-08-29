@@ -1,3 +1,5 @@
+import { applyTemporaryEffects as applySharedTemporaryEffects } from '@mandato/engine';
+
 export type SimulationIndicator = {
   key: string;
   label: string;
@@ -1000,25 +1002,7 @@ export class SimulationEngine {
     }
   }
   private applyTemporaryEffects(state: SimulationState) {
-    const effects = state.activeEffects ?? {};
-    for (const [key, change] of Object.entries(effects)) {
-      if (!change) continue;
-      if (key === 'approval') {
-        state.approval = this.clamp(state.approval + change);
-        continue;
-      }
-      const indicator = state.indicators.find((item) => item.key === key);
-      if (indicator) {
-        indicator.value = this.clamp(indicator.value + change);
-        indicator.trend = change;
-      }
-    }
-    state.activeEffects = Object.fromEntries(
-      Object.entries(effects).map(([key, value]) => [
-        key,
-        Math.abs(value) < 0.01 ? 0 : value * 0.75,
-      ]),
-    );
+    applySharedTemporaryEffects(state as any);
   }
   private applyActiveGroupEffects(state: SimulationState) {
     const active = state.activeGroupEffects ?? {};
