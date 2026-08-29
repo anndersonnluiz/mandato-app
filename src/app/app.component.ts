@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 
 type Game = SimulationState & {
@@ -420,24 +420,7 @@ export class AppComponent {
         category: 'DECISION',
       });
     }
-    this.game.groups?.forEach(
-      (group) =>
-        (group.satisfaction = Math.max(
-          0,
-          Math.min(
-            100,
-            group.satisfaction +
-              (option?.groupEffects?.[group.key] ?? 0) *
-                (decision.id.startsWith('public-pressure-')
-                  ? (group.reputation ?? group.satisfaction) < 50
-                    ? 0.6
-                    : (group.reputation ?? group.satisfaction) >= 75
-                      ? 1.25
-                      : 1
-                  : 1),
-          ),
-        )),
-    );
+    applySharedDecisionSocialEffects(this.game as any, optionId, option?.groupEffects, true, false, false);
     if (decision.id.startsWith('social-reaction-')) {
       const constructive = optionId.startsWith('meet-');
       this.game.approval = Math.max(0, Math.min(100, this.game.approval + (constructive ? 0.25 : -0.35)));
