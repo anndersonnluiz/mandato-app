@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyTemporaryEffects as applySharedTemporaryEffects, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -860,21 +860,7 @@ export class SimulationEngine {
     }
   }
   private applyEmergencySecretaryRecovery(state: SimulationState) {
-    for (const decision of state.decisions) {
-      if (
-        !decision.id.startsWith('critical-') ||
-        !decision.applied ||
-        decision.recovered
-      )
-        continue;
-      const key = decision.id.replace('critical-', '');
-      const secretary = state.secretaries?.find((item) => item.key === key);
-      if (secretary && decision.chosenOptionId?.startsWith('act-')) {
-        secretary.efficiency = Math.min(100, secretary.efficiency + 3);
-        secretary.pressure = Math.max(0, secretary.pressure - 6);
-      }
-      decision.recovered = true;
-    }
+    applySharedSecretaryRecovery(state as any);
   }
   private escalatePendingEmergencies(state: SimulationState) {
     const today = Date.parse(`${state.currentDate}T00:00:00Z`);
