@@ -1695,7 +1695,7 @@ export class SimulationEngine {
   private createCityPulseDecision(state: SimulationState) {
     const day = Number(state.currentDate.slice(-2));
     const id = `city-pulse-${state.currentDate}`;
-    if (day % 7 !== 0 || state.decisions.some((item) => item.id === id) || state.decisions.some((item) => item.status === 'PENDING' && item.urgency === 'ALTA')) return;
+    if (day < 8 || day % 7 !== 0 || state.decisions.some((item) => item.id === id) || state.decisions.some((item) => item.status === 'PENDING' && item.urgency === 'ALTA')) return;
     state.decisions.push({ id, createdDate: state.currentDate, title: 'Fim de semana movimentado no centro', context: 'O comércio local pede apoio para organizar uma programação que aumenta a circulação, mas exige uma despesa imediata.', status: 'PENDING', category: 'ESTRATÉGICA', urgency: 'MÉDIA', options: [
       { id: `support-${id}`, label: 'Apoiar a programação', description: 'Investe R$ 80 mil e melhora a confiança do comércio e dos moradores.', groupEffects: { business: 1.2, residents: 0.4 } },
       { id: `preserve-${id}`, label: 'Preservar o caixa', description: 'Evita a despesa, mas reduz o entusiasmo do comércio local.', groupEffects: { business: -0.8 } },
