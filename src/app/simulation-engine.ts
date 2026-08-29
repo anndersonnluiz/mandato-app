@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -942,21 +942,7 @@ export class SimulationEngine {
     createSharedSecretaryDecisions(state as any);
   }
   private applyEconomicPolicyEffects(state: SimulationState) {
-    const policy = state.economicPolicies;
-    if (!policy) return;
-    const transport = state.indicators.find((item) => item.key === 'transport');
-    if (transport && policy.commerceIncentive > 0)
-      transport.value = this.clamp(
-        transport.value + policy.commerceIncentive * 0.01,
-      );
-    const secretary = state.secretaries?.find(
-      (item) => item.key === 'administration',
-    );
-    if (secretary && policy.taxModernization > 0)
-      secretary.efficiency = Math.min(
-        100,
-        secretary.efficiency + policy.taxModernization * 0.02,
-      );
+    applySharedEconomicPolicyEffects(state as any);
   }
   private updateAdministrativeCapacity(state: SimulationState) {
     updateSharedAdministrativeCapacity(state as any);
