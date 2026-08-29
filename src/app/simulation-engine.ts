@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyTemporaryEffects as applySharedTemporaryEffects, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyTemporaryEffects as applySharedTemporaryEffects, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1087,15 +1087,7 @@ export class SimulationEngine {
     updateSharedAdministrativeCapacity(state as any);
   }
   private applyAdministrativeCapacityEffects(state: SimulationState) {
-    if ((state.administrativeCapacity ?? 100) >= 45) return;
-    for (const indicator of state.indicators) {
-      indicator.value = Math.max(0, indicator.value - 0.03);
-      indicator.trend = Math.min(indicator.trend, -0.03);
-    }
-    for (const group of state.groups ?? [])
-      group.satisfaction = Math.max(0, group.satisfaction - 0.04);
-    if (state.population !== undefined)
-      state.population = Math.max(0, state.population - 1);
+    applySharedCapacityEffects(state as any);
   }
 
   private createPopulationBulletin(state: SimulationState) {
