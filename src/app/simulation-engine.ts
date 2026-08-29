@@ -570,7 +570,6 @@ export class SimulationEngine {
     this.createPublicSentimentBulletin(state);
     this.applyBudgetSocialEffects(state);
     this.updateBudgetPressureHistory(state);
-    this.createSocialReaction(state);
     this.createPositiveReaction(state);
     if (state.evaluationDate && state.evaluationDate > '2025-01-14')
       this.createOperationalReview(state);
@@ -605,6 +604,7 @@ export class SimulationEngine {
     this.unlockDebtRenegotiation(state);
     this.createPriorityDecisions(state);
     this.unlockMobilityProject(state);
+    this.createSocialReaction(state);
     this.unlockSocialRecoveryProject(state);
     this.unlockInfrastructureContingency(state);
     this.recordPortfolioTransition(state);
