@@ -1,4 +1,4 @@
-import { applyTemporaryEffects as applySharedTemporaryEffects } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyTemporaryEffects as applySharedTemporaryEffects } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1147,49 +1147,10 @@ export class SimulationEngine {
   }
 
   private applyBudgetQuality(state: SimulationState) {
-    const baseline: Record<string, number> = {
-      health: 6000,
-      education: 5000,
-      infrastructure: 3000,
-      transport: 2500,
-      security: 1500,
-    };
-    for (const line of state.budget ?? []) {
-      const indicator = state.indicators.find((item) => item.key === line.key);
-      if (!indicator) continue;
-      const ratio = line.dailyCost / (baseline[line.key] ?? line.dailyCost);
-      const change = Math.max(-0.2, Math.min(0.2, (ratio - 1) * 0.12));
-      if (Math.abs(change) >= 0.01) {
-        indicator.value = this.clamp(indicator.value + change);
-        indicator.trend = change;
-      }
-    }
+    applySharedBudgetEffects(state as any, false);
   }
   private applyBudgetSocialEffects(state: SimulationState) {
-    const baseline: Record<string, number> = {
-      health: 6000,
-      education: 5000,
-      infrastructure: 3000,
-      transport: 2500,
-      security: 1500,
-    };
-    const affectedGroups: Record<string, Record<string, number>> = {
-      health: { families: 1, residents: 0.5 },
-      education: { families: 1, workers: 0.4 },
-      infrastructure: { residents: 1, business: 0.4 },
-      transport: { business: 1, workers: 0.7 },
-      security: { residents: 1, families: 0.5 },
-    };
-    for (const line of state.budget ?? []) {
-      const ratio = line.dailyCost / (baseline[line.key] ?? line.dailyCost);
-      const change = Math.max(-0.25, Math.min(0.25, (ratio - 1) * 0.15));
-      if (Math.abs(change) < 0.01) continue;
-      for (const group of state.groups ?? [])
-        group.satisfaction = this.clamp(
-          group.satisfaction +
-            change * (affectedGroups[line.key]?.[group.key] ?? 0),
-        );
-    }
+    applySharedBudgetEffects(state as any, true);
   }
   private updateBudgetPressureHistory(state: SimulationState) {
     state.budgetPressureDays ??= {};
