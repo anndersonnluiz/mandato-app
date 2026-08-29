@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -816,48 +816,7 @@ export class SimulationEngine {
     state.news.unshift(message); state.history.unshift(`${state.currentDate}: ${message}`);
   }
   private applyEmergencyResponses(state: SimulationState) {
-    for (const decision of state.decisions) {
-      if (
-        !decision.id.startsWith('critical-') ||
-        decision.status !== 'RESOLVED' ||
-        decision.applied ||
-        !decision.chosenOptionId
-      )
-        continue;
-      const key = decision.id.replace('critical-', '');
-      const indicator = state.indicators.find((item) => item.key === key);
-      const groupKey: Record<string, string> = {
-        health: 'families',
-        education: 'families',
-        infrastructure: 'residents',
-        transport: 'business',
-        security: 'residents',
-      };
-      const group = state.groups?.find((item) => item.key === groupKey[key]);
-      const acted = decision.chosenOptionId.startsWith('act-');
-      if (indicator)
-        indicator.value = this.clamp(indicator.value + (acted ? 4 : -2));
-      if (group)
-        group.satisfaction = this.clamp(group.satisfaction + (acted ? 2 : -2));
-      if (acted) {
-        state.treasury -= 200000;
-        state.ledger ??= [];
-        state.ledger.unshift({
-          date: state.currentDate,
-          label: `Resposta emergencial: ${indicator?.label ?? key}`,
-          amount: 200000,
-          kind: 'EXPENSE',
-          category: 'DECISION',
-        });
-        state.history.unshift(
-          `${state.currentDate}: recursos foram liberados para recuperar ${indicator?.label?.toLowerCase() ?? key}.`,
-        );
-      } else
-        state.history.unshift(
-          `${state.currentDate}: o gabinete adiou a resposta para ${indicator?.label?.toLowerCase() ?? key}.`,
-        );
-      decision.applied = true;
-    }
+    applySharedCriticalResponses(state as any);
   }
   private applyEmergencySecretaryRecovery(state: SimulationState) {
     applySharedSecretaryRecovery(state as any);
