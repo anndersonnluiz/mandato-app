@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applySecretaryResponses as applySharedSecretaryResponses, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createEducationConsequence as createSharedEducationConsequence, createFiscalContainmentDecision as createSharedFiscalContainmentDecision, createHospitalConsequence as createSharedHospitalConsequence, createInfrastructureConsequence as createSharedInfrastructureConsequence, createOperationalReviewDecision as createSharedOperationalReviewDecision, createPositiveReaction as createSharedPositiveReaction, createSecretaryDemands as createSharedSecretaryDemands, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, createTransportConsequence as createSharedTransportConsequence, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation, updatePopulation as updateSharedPopulation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -548,15 +548,7 @@ export class SimulationEngine {
       state.news.unshift(finance);
     }
     state.approval = this.clamp(state.approval + state.effects.approval);
-    if (state.population !== undefined) {
-      const serviceQuality =
-        state.indicators.reduce((sum, indicator) => sum + indicator.value, 0) /
-        Math.max(1, state.indicators.length);
-      state.populationTrend = Math.round(
-        (state.approval - 50) * 2 + (serviceQuality - 55) * 0.2,
-      );
-      state.population = Math.max(0, state.population + state.populationTrend);
-    }
+    if (state.population !== undefined) updateSharedPopulation(state as any);
     this.createPopulationBulletin(state);
     this.applyEconomicPolicyEffects(state);
     this.updateAdministrativeCapacity(state);
