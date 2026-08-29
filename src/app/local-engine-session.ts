@@ -4,11 +4,12 @@ import { SimulationState } from './simulation-engine';
 
 /** Fachada transitória para migrar o modo local sem interromper partidas existentes. */
 export class LocalEngineSession {
-  private readonly session = new GameSession(new LocalEngineStateRepository(), new MandatoEngine());
+  private readonly repository = new LocalEngineStateRepository();
+  private readonly session = new GameSession(this.repository, new MandatoEngine());
 
   async dispatch(state: SimulationState, command: Parameters<MandatoEngine['execute']>[1]): Promise<SimulationState> {
     const normalized = migrateGameState(state) as SimulationState;
-    await new LocalEngineStateRepository().save(normalized as any);
+    await this.repository.save(normalized as any);
     const result = await this.session.dispatch(normalized.id, command);
     return result as SimulationState;
   }
