@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1329,60 +1329,7 @@ export class SimulationEngine {
     state: SimulationState,
     weakest?: SimulationIndicator,
   ) {
-    if (!weakest || weakest.value >= 40 || !state.groups?.length) return;
-    const groupKey: Record<string, string> = {
-      health: 'families',
-      education: 'families',
-      infrastructure: 'residents',
-      transport: 'business',
-      security: 'residents',
-    };
-    const group = state.groups.find(
-      (item) => item.key === groupKey[weakest.key],
-    );
-    if (group) group.satisfaction = this.clamp(group.satisfaction - 0.8);
-    const secretary = state.secretaries?.find(
-      (item) => item.key === weakest.key,
-    );
-    if (secretary) {
-      secretary.pressure = Math.min(100, secretary.pressure + 4);
-      secretary.efficiency = Math.max(0, secretary.efficiency - 1);
-    }
-    state.administrativeAlerts ??= [];
-    const alert = `A secretaria de ${weakest.label.toLowerCase()} precisa de um plano de recuperação.`;
-    if (!state.administrativeAlerts.includes(alert)) {
-      state.administrativeAlerts.unshift(alert);
-      state.news.unshift(`Alerta administrativo: ${alert}`);
-    }
-    const decisionId = `critical-${weakest.key}`;
-    if (!state.decisions.some((decision) => decision.id === decisionId)) {
-      state.decisions.push({
-        id: decisionId,
-        createdDate: state.currentDate,
-        title: `Plano emergencial para ${weakest.label.toLowerCase()}`,
-        context: `O indicador de ${weakest.label.toLowerCase()} entrou em nível crítico. A secretaria solicita uma resposta imediata para evitar deterioração dos serviços.`,
-        category: 'URGENTE',
-        urgency: 'ALTA',
-        status: 'PENDING',
-        options: [
-          {
-            id: `act-${weakest.key}`,
-            label: 'Liberar resposta emergencial',
-            description:
-              'Direciona recursos agora e reduz a pressão sobre o serviço.',
-          },
-          {
-            id: `defer-${weakest.key}`,
-            label: 'Adiar a resposta',
-            description:
-              'Preserva o caixa, mas a insatisfação e o risco operacional aumentam.',
-          },
-        ],
-      });
-      state.news.unshift(
-        `Decisão urgente: o gabinete precisa agir em ${weakest.label.toLowerCase()}.`,
-      );
-    }
+    applySharedCriticalServiceReaction(state as any, weakest as any);
   }
   private unlockDrainage(state: SimulationState) {
     if (
