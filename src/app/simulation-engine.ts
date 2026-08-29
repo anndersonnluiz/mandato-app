@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -972,50 +972,7 @@ export class SimulationEngine {
     updateSharedBudgetPressureHistory(state as any);
   }
   private createSocialReaction(state: SimulationState) {
-    const candidate = [...(state.groups ?? [])].sort(
-      (a, b) => a.satisfaction - b.satisfaction,
-    )[0];
-    if (!candidate || candidate.satisfaction >= 45) return;
-    const id = `social-reaction-${state.currentDate}`;
-    if (state.decisions.some((decision) => decision.id === id)) return;
-    const pressureDays = state.budgetPressureDays?.[candidate.key] ?? 0;
-    const cause =
-      pressureDays >= 2
-        ? ` após ${pressureDays} dias de subfinanciamento afetando ${candidate.concern}`
-        : ` em meio às preocupações com ${candidate.concern}`;
-    const reputation = candidate.reputation ?? candidate.satisfaction;
-    const reactionImpact = reputation < 40 ? 3 : reputation > 60 ? 1.5 : 2;
-    state.decisions.push({
-      id,
-      createdDate: state.currentDate,
-      title: `${candidate.label} reage às condições da cidade`,
-      context: `A satisfação de ${candidate.label.toLowerCase()} caiu para ${Math.round(candidate.satisfaction)}%${cause}. A confiança histórica do grupo está em ${Math.round(reputation)}%, por isso a cobrança é ${reactionImpact > 2 ? 'mais intensa' : reactionImpact < 2 ? 'mais moderada' : 'proporcional'}.`,
-      category: 'URGENTE',
-      urgency: 'MÉDIA',
-      status: 'PENDING',
-      options: [
-        {
-          id: `meet-${candidate.key}`,
-          label: 'Receber representantes',
-          description:
-            'Abre diálogo e recupera confiança, mas consome capacidade administrativa.',
-          groupEffects: { [candidate.key]: reactionImpact, workers: 0.2 },
-        },
-        {
-          id: `dismiss-${candidate.key}`,
-          label: 'Minimizar a reclamação',
-          description:
-            'Evita mudar a agenda, mas amplia o desgaste com o grupo.',
-          groupEffects: { [candidate.key]: -reactionImpact },
-        },
-      ],
-    });
-    state.news.unshift(
-      `Pressão social: ${candidate.label} organizou uma manifestação sobre ${candidate.concern}.`,
-    );
-    state.history.unshift(
-      `${state.currentDate}: O gabinete recebeu uma reação pública de ${candidate.label.toLowerCase()}.`,
-    );
+    createSharedSocialReaction(state as any);
   }
   private createPositiveReaction(state: SimulationState) {
     if (
