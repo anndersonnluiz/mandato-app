@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -969,29 +969,7 @@ export class SimulationEngine {
     applySharedBudgetEffects(state as any, true);
   }
   private updateBudgetPressureHistory(state: SimulationState) {
-    state.budgetPressureDays ??= {};
-    const baseline: Record<string, number> = {
-      health: 6000,
-      education: 5000,
-      infrastructure: 3000,
-      transport: 2500,
-      security: 1500,
-    };
-    const affectedGroups: Record<string, string[]> = {
-      health: ['families', 'residents'],
-      education: ['families', 'workers'],
-      infrastructure: ['residents', 'business'],
-      transport: ['business', 'workers'],
-      security: ['residents', 'families'],
-    };
-    for (const line of state.budget ?? []) {
-      const underfunded =
-        line.dailyCost < (baseline[line.key] ?? line.dailyCost) * 0.9;
-      for (const groupKey of affectedGroups[line.key] ?? [])
-        state.budgetPressureDays[groupKey] = underfunded
-          ? (state.budgetPressureDays[groupKey] ?? 0) + 1
-          : 0;
-    }
+    updateSharedBudgetPressureHistory(state as any);
   }
   private createSocialReaction(state: SimulationState) {
     const candidate = [...(state.groups ?? [])].sort(
