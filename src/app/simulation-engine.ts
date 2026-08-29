@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyCriticalServiceReaction as applySharedCriticalServiceReaction, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyFocusBonus as applySharedFocusBonus, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createPositiveReaction as createSharedPositiveReaction, createSecretaryDecisions as createSharedSecretaryDecisions, createSocialReaction as createSharedSocialReaction, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateBudgetPressureHistory as updateSharedBudgetPressureHistory, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -975,6 +975,7 @@ export class SimulationEngine {
     createSharedSocialReaction(state as any);
   }
   private createPositiveReaction(state: SimulationState) {
+    createSharedPositiveReaction(state as any);
     if (
       !state.currentDate.endsWith('-05') &&
       !state.currentDate.endsWith('-10')
