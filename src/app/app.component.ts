@@ -14,6 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
+import { adjustBudget as applySharedBudgetAdjustment } from '@mandato/engine';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -1961,7 +1962,7 @@ export class AppComponent {
       });
       return;
     }
-    line.dailyCost = Math.max(0, line.dailyCost + delta);
+    applySharedBudgetAdjustment(this.game as any, key as any, delta);
     this.feedback = `${line.label}: orçamento ajustado para R$ ${line.dailyCost.toLocaleString('pt-BR')}/dia.`;
     this.save();
   }
