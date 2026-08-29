@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1219,32 +1219,7 @@ export class SimulationEngine {
     }
   }
   private applyOperationalReviews(state: SimulationState) {
-    for (const decision of state.decisions) {
-      if (
-        !decision.id.startsWith('operational-review-') ||
-        decision.status !== 'RESOLVED' ||
-        decision.applied
-      )
-        continue;
-      const key = decision.chosenOptionId
-        ?.replace('invest-review-', '')
-        .replace('defer-review-', '');
-      const secretary = state.secretaries?.find((item) => item.key === key);
-      if (secretary) {
-        const prioritized =
-          decision.chosenOptionId?.startsWith('invest-review-');
-        secretary.pressure = this.clamp(
-          secretary.pressure + (prioritized ? -8 : 5),
-        );
-        secretary.efficiency = this.clamp(
-          secretary.efficiency + (prioritized ? 2 : -1),
-        );
-        state.history.unshift(
-          `${state.currentDate}: a revisão de ${secretary.label.toLowerCase()} foi ${prioritized ? 'priorizada' : 'adiada'}.`,
-        );
-      }
-      decision.applied = true;
-    }
+    applySharedOperationalReviews(state as any);
   }
   private createStrategicAgenda(state: SimulationState) {
     const day = Number(state.currentDate.slice(-2));
