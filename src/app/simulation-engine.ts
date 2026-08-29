@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1222,6 +1222,7 @@ export class SimulationEngine {
     applySharedOperationalReviews(state as any);
   }
   private createStrategicAgenda(state: SimulationState) {
+    createSharedStrategicAgenda(state as any);
     const day = Number(state.currentDate.slice(-2));
     if (day !== 15) return;
     const weakest = [...state.indicators].sort((a, b) => a.value - b.value)[0];
