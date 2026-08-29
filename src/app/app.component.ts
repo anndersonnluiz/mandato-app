@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, createDecisionProject as applySharedCreateDecisionProject, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 
 type Game = SimulationState & {
@@ -339,19 +339,7 @@ export class AppComponent {
       const project = this.game.projects?.find((item) => item.id === projectId);
       if (project) project.priorityMode = optionId === `prioritize-${projectId}` ? 'PRIORITARIA' : 'NORMAL';
     }
-    if (optionId === 'authorize-mobility-project') {
-      this.game.projects ??= [];
-      if (!this.game.projects.some((project) => project.id === 'mobility-corridor'))
-        this.game.projects.push({ id: 'mobility-corridor', name: 'Corredor de mobilidade integrada', area: 'Transporte', totalCost: 280000, dailyExecutionCost: 9000, maintenanceCost: 2500, dailyIndicatorEffects: { transport: 0.04 }, dailyGroupEffects: { business: 0.05, residents: 0.03 }, daysTotal: 8, daysCompleted: 0, status: 'IN_PROGRESS' });
-    }
-    if (optionId === 'authorize-social-recovery') {
-      const candidate = [...(this.game.groups ?? [])].sort((a, b) => a.satisfaction - b.satisfaction)[0];
-      const config: Record<string, [string, string]> = { residents: ['Infraestrutura', 'Recuperação urbana'], families: ['Saúde', 'Ampliação da rede de atendimento'], workers: ['Educação', 'Recuperação escolar'], business: ['Transporte', 'Mobilidade comercial'] };
-      const [area, name] = config[candidate?.key ?? 'residents'] ?? config['residents'];
-      this.game.projects ??= [];
-      if (!this.game.projects.some((project) => project.id === 'social-recovery-project')) this.game.projects.push({ id: 'social-recovery-project', name, area, totalCost: 240000, dailyExecutionCost: 10000, maintenanceCost: 1800, dailyIndicatorEffects: { [({ Infraestrutura: 'infrastructure', Saúde: 'health', Educação: 'education', Transporte: 'transport' } as Record<string, string>)[area] ?? 'infrastructure']: 0.04 }, dailyGroupEffects: { [candidate?.key ?? 'residents']: 0.04 }, daysTotal: 6, daysCompleted: 0, status: 'IN_PROGRESS' });
-      this.game.treasury -= 240000;
-    }
+    applySharedCreateDecisionProject(this.game as any, optionId);
     applySharedAdministrativeDecision(this.game as any, optionId);
     applySharedSecretaryDemandDecision(this.game as any, optionId);
     if (optionId === 'commerce-incentive' || optionId === 'tax-modernization') {
@@ -422,16 +410,6 @@ export class AppComponent {
       this.game.approval = Math.max(0, this.game.approval - 0.1);
     }
     this.game.projects ??= [];
-    if (optionId === 'drainage')
-      this.game.projects.push({
-        id: 'drainage-avenue',
-        name: 'Drenagem da avenida do hospital',
-        area: 'Infraestrutura',
-        totalCost: 350000,
-        daysTotal: 5,
-        daysCompleted: 0,
-        status: 'IN_PROGRESS',
-      });
     this.game.causalLinks ??= [];
     this.game.activeGroupEffects ??= {};
     for (const [group, value] of Object.entries(option?.groupEffects ?? {}))
