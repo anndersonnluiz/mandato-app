@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyTemporaryEffects as applySharedTemporaryEffects } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyTemporaryEffects as applySharedTemporaryEffects, updateAdministrativeCapacity as updateSharedAdministrativeCapacity } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -1084,20 +1084,7 @@ export class SimulationEngine {
       );
   }
   private updateAdministrativeCapacity(state: SimulationState) {
-    const secretaries = state.secretaries ?? [];
-    if (!secretaries.length) return;
-    const average =
-      secretaries.reduce(
-        (sum, item) => sum + item.efficiency - item.pressure * 0.25,
-        0,
-      ) / secretaries.length;
-    const policyBonus = (state.economicPolicies?.taxModernization ?? 0) * 0.5;
-    const activeProjects = (state.projects ?? []).filter((project) => project.status === 'IN_PROGRESS');
-    const portfolioLoad = activeProjects.reduce((sum, project) => sum + (project.priorityMode === 'PRIORITARIA' ? 2 : 1), 0);
-    state.administrativeCapacity = Math.max(
-      0,
-      Math.min(100, Math.round(average + policyBonus - Math.max(0, portfolioLoad - 1) * 2)),
-    );
+    updateSharedAdministrativeCapacity(state as any);
   }
   private applyAdministrativeCapacityEffects(state: SimulationState) {
     if ((state.administrativeCapacity ?? 100) >= 45) return;
