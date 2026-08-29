@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, MandatoEngine } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 
 type Game = SimulationState & {
@@ -56,6 +56,7 @@ export class AppComponent {
   milestonePage = 0;
   private readonly engine = new SimulationEngine();
   private readonly sharedLocalSession = new LocalEngineSession();
+  private readonly sharedEngine = new MandatoEngine();
   private readonly repository = new LocalGameRepository();
   private readonly http = inject(HttpClient, { optional: true });
   private readonly api = this.http ? new ApiGameRepository(this.http) : null;
@@ -1126,11 +1127,8 @@ export class AppComponent {
       });
       return;
     }
-    // O pipeline compartilhado será ativado após a paridade dos efeitos
-    // enriquecidos; até lá, preservamos o comportamento completo das partidas.
-    const result = this.engine.advanceDay(this.game);
-    this.game = result.state as Game;
-    this.feedback = result.report;
+    this.game = this.sharedEngine.execute(this.game as any, { type: 'ADVANCE_DAY' }) as unknown as Game;
+    this.feedback = 'O motor compartilhado processou os efeitos da decisão.';
     this.save();
   }
   retryOnlineAction() {
