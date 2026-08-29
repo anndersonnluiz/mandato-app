@@ -1,4 +1,4 @@
-import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
+import { applyBudgetEffects as applySharedBudgetEffects, applyCapacityEffects as applySharedCapacityEffects, applyCriticalResponses as applySharedCriticalResponses, applyEconomicPolicyEffects as applySharedEconomicPolicyEffects, applyOperationalReviews as applySharedOperationalReviews, applySecretaryRecovery as applySharedSecretaryRecovery, applyStrategicAgendas as applySharedStrategicAgendas, applyTemporaryEffects as applySharedTemporaryEffects, createSecretaryDecisions as createSharedSecretaryDecisions, createStrategicAgenda as createSharedStrategicAgenda, escalateCriticalDecisions as escalateSharedCriticalDecisions, updateAdministrativeCapacity as updateSharedAdministrativeCapacity, updateGroupConcerns as updateSharedGroupConcerns, updateGroupReputation as updateSharedGroupReputation } from '@mandato/engine';
 
 export type SimulationIndicator = {
   key: string;
@@ -838,18 +838,7 @@ export class SimulationEngine {
     updateSharedGroupReputation(state as any);
   }
   private updateGroupConcerns(state: SimulationState) {
-    const concerns: Record<string, string[]> = {
-      residents: ['saúde', 'infraestrutura', 'segurança urbana'],
-      workers: ['educação', 'transporte', 'condições de trabalho'],
-      business: ['transporte', 'infraestrutura', 'atividade econômica'],
-      families: ['saúde', 'educação', 'segurança urbana'],
-    };
-    const byKey = new Map(state.indicators.map((item) => [item.key, item]));
-    for (const group of state.groups ?? []) {
-      const options = concerns[group.key] ?? ['qualidade dos serviços'];
-      const weakest = options.map((label) => [...byKey.values()].find((item) => item.label.toLowerCase().includes(label.split(' ')[0]))).filter(Boolean).sort((a, b) => (a!.value - b!.value))[0];
-      if (weakest && weakest.value < 58) group.concern = weakest.label.toLowerCase();
-    }
+    updateSharedGroupConcerns(state as any);
   }
   private dailyBulletin(state: SimulationState, weakest?: SimulationIndicator) {
     const snapshots = state.snapshots ?? [];
