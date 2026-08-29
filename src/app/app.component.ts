@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 
 type Game = SimulationState & {
@@ -353,42 +353,7 @@ export class AppComponent {
       this.game.treasury -= 240000;
     }
     applySharedAdministrativeDecision(this.game as any, optionId);
-    if (optionId.startsWith('stabilize-') && optionId.endsWith('-demand')) {
-      const secretaryKey = optionId.replace('stabilize-', '').replace('-demand', '');
-      this.game.secretaryRecoveryDays ??= {};
-      this.game.secretaryRecoveryDays[secretaryKey] = 5;
-    }
-    if (optionId === 'stabilize-health-demand' || optionId === 'defer-health-demand') {
-      const health = this.game.secretaries?.find((item) => item.key === 'health');
-      if (health) { health.pressure = Math.max(0, Math.min(100, health.pressure + (optionId === 'stabilize-health-demand' ? -10 : 5))); health.efficiency = Math.max(0, Math.min(100, health.efficiency + (optionId === 'stabilize-health-demand' ? 2 : -1))); }
-    if (optionId === 'stabilize-health-demand') this.game.treasury -= 180000;
-    }
-    if (optionId === 'stabilize-education-demand' || optionId === 'defer-education-demand') {
-      const education = this.game.secretaries?.find((item) => item.key === 'education');
-      if (education) { education.pressure = Math.max(0, Math.min(100, education.pressure + (optionId === 'stabilize-education-demand' ? -10 : 5))); education.efficiency = Math.max(0, Math.min(100, education.efficiency + (optionId === 'stabilize-education-demand' ? 2 : -1))); }
-      if (optionId === 'stabilize-education-demand') this.game.treasury -= 160000;
-    }
-    if (optionId === 'stabilize-transport-demand' || optionId === 'defer-transport-demand') {
-      const transport = this.game.secretaries?.find((item) => item.key === 'transport');
-      if (transport) { transport.pressure = Math.max(0, Math.min(100, transport.pressure + (optionId === 'stabilize-transport-demand' ? -10 : 5))); transport.efficiency = Math.max(0, Math.min(100, transport.efficiency + (optionId === 'stabilize-transport-demand' ? 2 : -1))); }
-      if (optionId === 'stabilize-transport-demand') this.game.treasury -= 140000;
-      this.game.approval = Math.max(0, Math.min(100, this.game.approval + (optionId === 'stabilize-transport-demand' ? 0.15 : -0.1)));
-    }
-    if (optionId === 'stabilize-infrastructure-demand' || optionId === 'defer-infrastructure-demand') {
-      const infrastructure = this.game.secretaries?.find((item) => item.key === 'infrastructure');
-      if (infrastructure) { infrastructure.pressure = Math.max(0, Math.min(100, infrastructure.pressure + (optionId === 'stabilize-infrastructure-demand' ? -10 : 5))); infrastructure.efficiency = Math.max(0, Math.min(100, infrastructure.efficiency + (optionId === 'stabilize-infrastructure-demand' ? 2 : -1))); }
-      if (optionId === 'stabilize-infrastructure-demand') this.game.treasury -= 220000;
-      if (optionId === 'stabilize-infrastructure-demand') { this.game.projects ??= []; if (!this.game.projects.some((project) => project.id === 'urban-repairs')) this.game.projects.push({ id: 'urban-repairs', name: 'Reparos urbanos emergenciais', area: 'Infraestrutura', totalCost: 220000, dailyExecutionCost: 12000, maintenanceCost: 1800, dailyIndicatorEffects: { infrastructure: 0.05 }, dailyGroupEffects: { residents: 0.04, families: 0.03 }, daysTotal: 6, daysCompleted: 0, status: 'IN_PROGRESS' }); }
-      const transport = this.game.secretaries?.find((item) => item.key === 'transport');
-      if (optionId === 'defer-infrastructure-demand' && transport) { transport.pressure = Math.min(100, transport.pressure + 2); this.game.history.unshift(this.game.currentDate + ': Efeito cruzado: o adiamento da infraestrutura aumentou a pressão sobre o Transporte.'); }
-    }
-    if (optionId === 'stabilize-security-demand' || optionId === 'defer-security-demand') {
-      const security = this.game.secretaries?.find((item) => item.key === 'security');
-      if (security) { security.pressure = Math.max(0, Math.min(100, security.pressure + (optionId === 'stabilize-security-demand' ? -10 : 5))); security.efficiency = Math.max(0, Math.min(100, security.efficiency + (optionId === 'stabilize-security-demand' ? 2 : -1))); }
-      if (optionId === 'stabilize-security-demand') this.game.treasury -= 190000;
-      const health = this.game.secretaries?.find((item) => item.key === 'health');
-      if (optionId === 'defer-security-demand' && health) { health.pressure = Math.min(100, health.pressure + 1.5); this.game.history.unshift(this.game.currentDate + ': Efeito cruzado: o adiamento da segurança aumentou a pressão sobre a Saúde.'); }
-    }
+    applySharedSecretaryDemandDecision(this.game as any, optionId);
     if (optionId === 'commerce-incentive' || optionId === 'tax-modernization') {
       this.game.economicPolicies ??= {
         commerceIncentive: 0,
