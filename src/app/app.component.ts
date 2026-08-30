@@ -17,6 +17,7 @@ import { CampaignAction, ElectionEngine, ElectionState } from './election-engine
 import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, createDecisionProject as applySharedCreateDecisionProject, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 import { AreaNavigationService } from './area-navigation.service';
+import { SummaryStatsComponent } from './summary-stats.component';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -30,7 +31,7 @@ type Game = SimulationState & {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SummaryStatsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
