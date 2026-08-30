@@ -23,6 +23,7 @@ import { FinancialStripComponent } from './financial-strip.component';
 import { AreaNavigationComponent } from './area-navigation.component';
 import { GovernmentMemoryComponent } from './government-memory.component';
 import { ElectionCandidatesComponent } from './election-candidates.component';
+import { ElectionActionsComponent } from './election-actions.component';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -36,7 +37,7 @@ type Game = SimulationState & {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, SummaryStatsComponent, CityIndicatorsComponent, FinancialStripComponent, AreaNavigationComponent, GovernmentMemoryComponent, ElectionCandidatesComponent],
+  imports: [CommonModule, FormsModule, SummaryStatsComponent, CityIndicatorsComponent, FinancialStripComponent, AreaNavigationComponent, GovernmentMemoryComponent, ElectionCandidatesComponent, ElectionActionsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
@@ -182,6 +183,12 @@ export class AppComponent {
     if (typeof document !== 'undefined') {
       requestAnimationFrame(() => document.getElementById('conteudo-principal')?.focus({ preventScroll: true }));
     }
+  }
+  runCampaignActionFromView(action: string) {
+    this.runCampaignAction(action as CampaignAction);
+  }
+  answerElectionDebateFromView(answer: string) {
+    this.answerElectionDebate(answer as any);
   }
   areaTitle() {
     return ({ resumo: 'Visão geral do mandato', gabinete: 'Decisões do gabinete', cidade: 'A cidade em movimento', financas: 'Saúde financeira do mandato', memoria: 'Memória e consequências', metas: 'Metas e entregas', avaliacao: 'Avaliação do ciclo', eleicoes: 'Eleições e campanha', configuracoes: 'Configurações da partida' } as Record<string, string>)[this.activeArea] ?? 'Mandato';

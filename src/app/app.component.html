@@ -153,21 +153,14 @@
       </div>
       <p class="panel-note" *ngIf="electionState.phase === 'PRE_CAMPAIGN'">Pré-campanha aberta. Organize sua estratégia antes de pedir o voto.</p>
       <button type="button" *ngIf="electionState.phase === 'PRE_CAMPAIGN'" (click)="startCampaign()">Iniciar campanha →</button>
-      <div class="campaign-actions" *ngIf="electionState.phase === 'CAMPAIGN'">
-        <small>SEMANA {{ electionState.week + 1 }} DE 3 · verba de campanha <b>{{ electionState.campaignFunds | number: '1.0-0' }} créditos</b></small>
-        <button type="button" [disabled]="electionState.campaignFunds < 10" (click)="runCampaignAction('MEET_GROUPS')">Ouvir grupos sociais <small>−10</small></button>
-        <button type="button" [disabled]="electionState.campaignFunds < 15" (click)="runCampaignAction('VISIT_PROJECT')">Visitar uma entrega <small>−15</small></button>
-        <button type="button" [disabled]="electionState.campaignFunds < 20" (click)="runCampaignAction('CRISIS_COMMUNICATION')">Comunicar em crise <small>−20</small></button>
-        <button type="button" [disabled]="electionState.campaignFunds < 30" (click)="runCampaignAction('NEW_PROMISE')">Lançar promessa <small>−30</small></button>
-      </div>
-      <div class="campaign-actions" *ngIf="electionState.phase === 'DEBATE'">
-        <small>DEBATE · responda à principal crítica da oposição</small>
-        <p class="debate-question">“{{ electionState.debateQuestion }}”</p>
-        <button type="button" (click)="answerElectionDebate('ACCOUNTABILITY')">Prestar contas</button>
-        <button type="button" (click)="answerElectionDebate('PROPOSAL')">Apresentar proposta</button>
-        <button type="button" (click)="answerElectionDebate('ADMIT_FAILURE')">Admitir falhas</button>
-        <button type="button" (click)="answerElectionDebate('ATTACK')">Atacar a oposição</button>
-      </div>
+      <app-election-actions
+        [phase]="electionState.phase"
+        [funds]="electionState.campaignFunds"
+        [week]="electionState.week"
+        [question]="electionState.debateQuestion"
+        (campaign)="runCampaignActionFromView($event)"
+        (debate)="answerElectionDebateFromView($event)"
+      ></app-election-actions>
       <p class="election-result" *ngIf="electionState.explanation">{{ electionState.explanation }}</p>
       <div class="election-history" *ngIf="electionState.history.length">
         <small>JORNADA DA CAMPANHA</small>
