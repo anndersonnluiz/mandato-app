@@ -45,6 +45,13 @@
       <option value="memoria">Memória</option><option value="metas">Metas</option><option value="avaliacao">Avaliação</option><option value="eleicoes">Eleições</option>
     </select>
   </label>
+  <div *ngIf="game" class="area-heading" aria-live="polite">
+    <div>
+      <small>ÁREA DO MANDATO</small>
+      <h2>{{ areaTitle() }}</h2>
+    </div>
+    <p>{{ areaDescription() }}</p>
+  </div>
   <section *ngIf="!game" class="start">
     <h2>Comece seu mandato</h2>
     <input [(ngModel)]="mayorName" placeholder="Nome do prefeito" /><input

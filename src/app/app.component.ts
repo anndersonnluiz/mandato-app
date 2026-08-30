@@ -177,6 +177,12 @@ export class AppComponent {
   selectArea(area: string) {
     this.activeArea = this.navigation.select(area);
   }
+  areaTitle() {
+    return ({ resumo: 'Visão geral do mandato', gabinete: 'Decisões do gabinete', cidade: 'A cidade em movimento', financas: 'Saúde financeira do mandato', memoria: 'Memória e consequências', metas: 'Metas e entregas', avaliacao: 'Avaliação do ciclo', eleicoes: 'Eleições e campanha', configuracoes: 'Configurações da partida' } as Record<string, string>)[this.activeArea] ?? 'Mandato';
+  }
+  areaDescription() {
+    return ({ resumo: 'O que mudou hoje e o que merece sua atenção.', gabinete: 'Escolha os próximos movimentos do governo.', cidade: 'Indicadores, demandas sociais e operação das secretarias.', financas: 'Acompanhe caixa, orçamento e projeções antes de agir.', memoria: 'Veja como suas decisões estão mudando a cidade.', metas: 'Acompanhe o progresso das prioridades do ciclo.', avaliacao: 'Leia o resultado do seu governo e prepare o próximo ciclo.', eleicoes: 'Enfrente a oposição, participe dos debates e dispute o voto.', configuracoes: 'Gerencie backup, persistência e encerramento.' } as Record<string, string>)[this.activeArea] ?? '';
+  }
   async exportParityProjection() {
     // A comparação precisa usar a jornada canônica, e não uma partida que o
     // jogador possa ter conduzido por escolhas diferentes.
@@ -192,7 +198,7 @@ export class AppComponent {
   @HostListener('window:hashchange')
   syncAreaFromHash() {
     const area = window.location.hash.replace(/^#/, '');
-    if (['gabinete', 'cidade', 'financas', 'memoria', 'metas', 'avaliacao', 'configuracoes'].includes(area)) {
+    if (['resumo', 'gabinete', 'cidade', 'financas', 'memoria', 'metas', 'avaliacao', 'eleicoes', 'configuracoes'].includes(area)) {
       this.activeArea = this.navigation.fromHash(area);
     }
   }
