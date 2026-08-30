@@ -135,6 +135,7 @@ button {
   border-radius: 12px;
   padding: 18px;
 }
+.stats article { display: flex; min-width: 0; flex-direction: column; justify-content: flex-start; }
 .stats strong {
   display: block;
   font-size: 21px;
@@ -479,6 +480,9 @@ button {
 .advance:focus-visible { outline: 3px solid rgba(212, 155, 59, .45); outline-offset: 3px; }
 .advance:disabled { opacity: .6; cursor: wait; box-shadow: none; }
 .stats strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stats .stat-value { font-size: clamp(1.05rem, 1.8vw, 1.35rem); letter-spacing: -.035em; line-height: 1.15; }
+.stats .money-value { font-size: clamp(.93rem, 1.55vw, 1.2rem); letter-spacing: -.045em; }
+@media (max-width: 900px) { .stats .money-value { font-size: clamp(.86rem, 2.4vw, 1.1rem); } }
 .reset {
   margin-top: 0;
   background: #236b4e;
