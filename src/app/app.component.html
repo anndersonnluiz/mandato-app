@@ -36,6 +36,13 @@
     <a href="#avaliacao" [class.active]="activeArea === 'avaliacao'" [attr.aria-current]="activeArea === 'avaliacao' ? 'page' : null" (click)="selectArea('avaliacao')">Avaliação</a>
     <a href="#configuracoes" [class.active]="activeArea === 'configuracoes'" [attr.aria-current]="activeArea === 'configuracoes' ? 'page' : null" (click)="selectArea('configuracoes')">Configurações</a>
   </nav>
+  <label *ngIf="game" class="mobile-area-picker">
+    <span>Seção atual</span>
+    <select [ngModel]="activeArea" (ngModelChange)="selectArea($event)">
+      <option value="gabinete">Gabinete</option><option value="cidade">Cidade</option><option value="financas">Finanças</option>
+      <option value="memoria">Memória</option><option value="metas">Metas</option><option value="avaliacao">Avaliação</option>
+    </select>
+  </label>
   <section *ngIf="!game" class="start">
     <h2>Comece seu mandato</h2>
     <input [(ngModel)]="mayorName" placeholder="Nome do prefeito" /><input
