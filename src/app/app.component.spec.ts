@@ -56,12 +56,14 @@ describe('AppComponent', () => {
       fixture.nativeElement.querySelectorAll('.area-nav a') as NodeListOf<HTMLAnchorElement>,
     );
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
+      '#resumo',
       '#gabinete',
       '#cidade',
       '#financas',
       '#memoria',
       '#metas',
       '#avaliacao',
+      '#eleicoes',
       '#configuracoes',
     ]);
     expect(new Set(links.map((link) => link.getAttribute('href'))).size).toBe(
@@ -92,8 +94,8 @@ describe('AppComponent', () => {
     app.selectArea('financas');
     fixture.detectChanges();
     expect(app.activeArea).toBe('financas');
-    expect(links[2].classList.contains('active')).toBeTrue();
-    expect(links[2].getAttribute('aria-current')).toBe('page');
+    expect(links[3].classList.contains('active')).toBeTrue();
+    expect(links[3].getAttribute('aria-current')).toBe('page');
     expect(links[0].classList.contains('active')).toBeFalse();
     expect(links[0].getAttribute('aria-current')).toBeNull();
   });
@@ -155,7 +157,7 @@ describe('AppComponent', () => {
     app.advance();
     expect(app.game!.treasury).toBe(39862000);
     expect(app.game!.indicators[0].value).toBe(58.25);
-    expect(app.game!.history.length).toBe(4);
+    expect(app.game!.history.length).toBe(5);
   });
 
   it('migra uma partida antiga preenchendo os novos sistemas sem apagar o progresso', () => {
