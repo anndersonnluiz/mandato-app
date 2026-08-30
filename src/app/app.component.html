@@ -229,19 +229,12 @@
       <h2>Contexto do novo ciclo</h2>
       <p *ngFor="let item of continuationBrief()">{{ item }}</p>
     </section>
-    <section class="finance-strip">
-      <span
-        ><small>RECEITA MENSAL PREVISTA</small
-        ><b>R$ {{ projectedMonthlyRevenue() | number }}</b></span
-      ><span
-        ><small>DESPESA OPERACIONAL MENSAL</small
-        ><b>R$ {{ budgetTotal() * 30 | number }}</b></span
-      ><span
-        ><small>SALDO PROJETADO</small
-        ><b>R$ {{ projectedMonthlyBalance() | number }}</b
-        ><small>{{ financialStatus() }}</small></span
-      >
-    </section>
+    <app-financial-strip
+      [revenue]="projectedMonthlyRevenue()"
+      [expenses]="budgetTotal() * 30"
+      [balance]="projectedMonthlyBalance()"
+      [status]="financialStatus()"
+    ></app-financial-strip>
     <div id="gabinete" class="grid area-anchor">
       <app-city-indicators [indicators]="game.indicators"></app-city-indicators>
       <section class="panel cabinet-decisions">
