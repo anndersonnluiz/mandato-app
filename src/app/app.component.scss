@@ -1110,6 +1110,13 @@ main[data-active-area="memoria"] > .legacy-panel,
 main[data-active-area="memoria"] > .consequences-panel,
 main[data-active-area="memoria"] > .chain-panel,
 main[data-active-area="memoria"] > .temporary-effects { display: block; }
+main[data-active-area="memoria"] > #cidade { display: grid; }
+main[data-active-area="memoria"] > #cidade > :not(.news-panel):not(#memoria):not(.legacy-panel):not(.consequences-panel):not(.chain-panel) { display: none; }
+main[data-active-area="memoria"] > #cidade > .news-panel,
+main[data-active-area="memoria"] > #cidade > #memoria,
+main[data-active-area="memoria"] > #cidade > .legacy-panel,
+main[data-active-area="memoria"] > #cidade > .consequences-panel,
+main[data-active-area="memoria"] > #cidade > .chain-panel { display: block; }
 
 main[data-active-area="metas"] > .objectives,
 main[data-active-area="metas"] > .cycle-brief,
