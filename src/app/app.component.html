@@ -36,18 +36,23 @@
     <p>{{ areaDescription() }}</p>
   </div>
   <section *ngIf="!game" class="start">
-    <h2>Comece seu mandato</h2>
-    <input [(ngModel)]="mayorName" placeholder="Nome do prefeito" /><input
+    <div class="access-brand"><img src="assets/mandato-logo.png" alt="MANDATO — estratégia e gestão pública" /></div>
+    <span class="access-kicker">SIMULADOR DE GOVERNO</span>
+    <h2>Seu mandato começa agora</h2>
+    <p class="access-lead">Tome decisões, equilibre a cidade e conquiste a confiança dos moradores.</p>
+    <div class="access-form">
+      <label>Como devemos chamar você?<input [(ngModel)]="mayorName" placeholder="Nome do prefeito" /></label><label>Qual cidade você vai governar?<input
       [(ngModel)]="cityName"
       placeholder="Nome da cidade"
-    /><label class="mode-toggle"
+    /></label><label class="mode-toggle"
       ><input
         type="checkbox"
         [ngModel]="onlineMode"
         (ngModelChange)="setOnlineMode($event)"
       />
       Usar API online</label
-    ><button (click)="create()">Criar partida</button>
+    ><button class="access-submit" (click)="create()">Entrar no mandato <span>→</span></button>
+    </div>
     <p aria-live="polite">{{ feedback }}</p>
   </section>
   <ng-container *ngIf="game">
