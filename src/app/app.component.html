@@ -543,7 +543,7 @@
         <article><span>Projetos</span><b>R$ {{ categoryTotal("PROJECT") | number }}</b><i><em [style.width.%]="categoryShare('PROJECT')"></em></i><small>{{ categoryShare('PROJECT') | number:'1.0-0' }}% do total</small></article>
       </div>
     </section>
-    <app-budget-controls [budget]="game.budget" [impact]="budgetImpact.bind(this)" [preview]="budgetPreview.bind(this)" (adjust)="adjustBudget($event.key, $event.amount)"></app-budget-controls>
+    <app-budget-controls [budget]="game.budget || []" [impact]="budgetImpact.bind(this)" [preview]="budgetPreview.bind(this)" (adjust)="adjustBudget($event.key, $event.amount)"></app-budget-controls>
     <section class="panel final-report" *ngIf="game.evaluation">
       <h2>Relatório do primeiro ciclo</h2>
       <div>
