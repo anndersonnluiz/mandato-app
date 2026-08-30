@@ -424,14 +424,11 @@
           </article>
         </div>
       </section>
-      <section id="memoria" class="panel narrative-panel memory-panel area-anchor" *ngIf="game.history?.length">
-        <div class="section-heading"><span class="section-kicker">REGISTRO DO MANDATO</span><h2>Memória do governo</h2></div>
-        <div class="feed-list">
-          <article class="feed-item" *ngFor="let item of game.history | slice: 0 : 4">
-            <span class="feed-icon">↳</span><div><small class="feed-type">{{ narrativeType(item) }}</small><p>{{ formatNarrative(item) }}</p></div>
-          </article>
-        </div>
-      </section>
+      <app-government-memory
+        [history]="game.history || []"
+        [formatNarrative]="formatNarrative"
+        [narrativeType]="narrativeType"
+      ></app-government-memory>
       <section class="panel narrative-panel legacy-panel" *ngIf="game.legacy?.length">
         <div class="section-heading"><span class="section-kicker">O QUE FICA</span><h2>Legado institucional</h2></div>
         <p class="panel-note">Marcos que continuam orientando os próximos ciclos.</p>

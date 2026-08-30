@@ -1052,6 +1052,7 @@ main[data-active-area] > .finance-strip,
 main[data-active-area] > app-financial-strip,
 main[data-active-area] > #gabinete,
 main[data-active-area] > #cidade,
+main[data-active-area] > app-government-memory,
 main[data-active-area] > .news-panel,
 main[data-active-area] > #memoria,
 main[data-active-area] > .legacy-panel,
@@ -1113,13 +1114,14 @@ main[data-active-area="memoria"] > .consequences-panel,
 main[data-active-area="memoria"] > .chain-panel,
 main[data-active-area="memoria"] > .temporary-effects { display: block; }
 main[data-active-area="memoria"] > #cidade { display: grid; }
-main[data-active-area="memoria"] > #cidade > :not(.news-panel):not(#memoria):not(.legacy-panel):not(.consequences-panel):not(.chain-panel):not(.planning-panel) { display: none; }
+main[data-active-area="memoria"] > #cidade > :not(.news-panel):not(app-government-memory):not(.legacy-panel):not(.consequences-panel):not(.chain-panel):not(.planning-panel) { display: none; }
 main[data-active-area="memoria"] > #cidade > .news-panel,
 main[data-active-area="memoria"] > #cidade > #memoria,
 main[data-active-area="memoria"] > #cidade > .legacy-panel,
 main[data-active-area="memoria"] > #cidade > .consequences-panel,
 main[data-active-area="memoria"] > #cidade > .chain-panel { display: block; }
 main[data-active-area="memoria"] > #cidade > .planning-panel { display: block; }
+main[data-active-area="memoria"] > #cidade > app-government-memory { display: block; }
 
 main[data-active-area="metas"] > .objectives,
 main[data-active-area="metas"] > .cycle-brief,
