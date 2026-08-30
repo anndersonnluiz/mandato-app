@@ -468,16 +468,16 @@
           </details>
         </div>
       </section>
-      <section class="panel" *ngIf="accumulatedPatterns().length">
+      <section class="panel planning-panel" *ngIf="accumulatedPatterns().length">
         <h2>Padrões do mandato</h2>
         <p class="panel-note">Repetições de escolha começam a formar uma orientação de governo.</p>
         <p *ngFor="let pattern of accumulatedPatterns()"><b>{{ pattern.label }}</b><br /><small>{{ pattern.detail }}</small></p>
       </section>
-      <section class="panel" *ngIf="planningTransitions().length">
+      <section class="panel planning-panel" *ngIf="planningTransitions().length">
         <h2>Linha do tempo do planejamento</h2>
         <p *ngFor="let item of planningTransitions()">{{ formatNarrative(item) }}</p>
       </section>
-      <section class="panel" *ngIf="planningMilestones().length">
+      <section class="panel planning-panel" *ngIf="planningMilestones().length">
         <h2>Marcos do governo</h2>
         <label>Filtrar marcos
           <select [(ngModel)]="milestoneFilter" (ngModelChange)="changeMilestoneFilter($event)">
