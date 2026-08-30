@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   SimulationDecision,
@@ -42,6 +42,7 @@ type Game = SimulationState & {
   imports: [CommonModule, FormsModule, SummaryStatsComponent, CityIndicatorsComponent, FinancialStripComponent, AreaNavigationComponent, GovernmentMemoryComponent, ElectionCandidatesComponent, ElectionActionsComponent, BudgetControlsComponent, LedgerListComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class AppComponent {
   game: Game | null = null;
