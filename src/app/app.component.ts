@@ -69,7 +69,7 @@ export class AppComponent {
   connectionStatus: 'OFFLINE' | 'CHECKING' | 'ONLINE' | 'UNAVAILABLE' =
     'OFFLINE';
   onlineBusy = false;
-  activeArea = 'gabinete';
+  activeArea = 'resumo';
   selectedCabinetDecisionId?: string;
   onlinePersistence = '';
   pendingOnlineAction?: { kind: 'resolve' | 'advance' | 'continue'; operationId: string; decisionId?: string; optionId?: string } = this.readPendingOnlineAction();

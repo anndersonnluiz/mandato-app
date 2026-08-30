@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 
-export type GovernmentArea = 'gabinete' | 'cidade' | 'financas' | 'memoria' | 'metas' | 'avaliacao' | 'configuracoes';
+export type GovernmentArea = 'resumo' | 'gabinete' | 'cidade' | 'financas' | 'memoria' | 'metas' | 'avaliacao' | 'eleicoes' | 'configuracoes';
 
-const AREAS: GovernmentArea[] = ['gabinete', 'cidade', 'financas', 'memoria', 'metas', 'avaliacao', 'configuracoes'];
+const AREAS: GovernmentArea[] = ['resumo', 'gabinete', 'cidade', 'financas', 'memoria', 'metas', 'avaliacao', 'eleicoes', 'configuracoes'];
 
 @Injectable({ providedIn: 'root' })
 export class AreaNavigationService {
-  private current: GovernmentArea = 'gabinete';
+  private current: GovernmentArea = 'resumo';
 
   get activeArea(): GovernmentArea { return this.current; }
 

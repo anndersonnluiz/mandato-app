@@ -1081,6 +1081,11 @@ main[data-active-area="gabinete"] > #gabinete,
 main[data-active-area="gabinete"] > .daily-summary,
 main[data-active-area="gabinete"] > .daily-events { display: block; }
 
+main[data-active-area="resumo"] > .daily-summary,
+main[data-active-area="resumo"] > .daily-events,
+main[data-active-area="resumo"] > .attention,
+main[data-active-area="resumo"] > app-financial-strip { display: block; }
+
 main[data-active-area="cidade"] > #cidade,
 main[data-active-area="cidade"] > .daily-events { display: block; }
 
@@ -1112,6 +1117,10 @@ main[data-active-area="avaliacao"] > .final-report,
 main[data-active-area="avaliacao"] > .evaluation-metrics,
 main[data-active-area="avaliacao"] > .decision-index,
 main[data-active-area="avaliacao"] > .decision-history { display: block; }
+
+main[data-active-area="eleicoes"] > .evaluation,
+main[data-active-area="eleicoes"] > .election-preview,
+main[data-active-area="eleicoes"] > .final-report { display: block; }
 
 main[data-active-area="configuracoes"] > #configuracoes { display: block; }
 
