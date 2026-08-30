@@ -501,23 +501,7 @@
         <span class="no-policy" *ngIf="!policies.commerceIncentive && !policies.taxModernization">Nenhum programa ativo neste momento.</span>
       </div>
     </section>
-    <section class="panel ledger" *ngIf="game.ledger?.length">
-      <h2>Livro-caixa recente</h2>
-      <select aria-label="Filtrar lançamentos do Livro-caixa" [(ngModel)]="ledgerFilter">
-        <option value="ALL">Todas</option>
-        <option value="INCOME">Entradas</option>
-        <option value="EXPENSE">Saídas</option>
-      </select>
-      <div class="ledger-feed">
-        <article class="ledger-entry" *ngFor="let entry of filteredLedger()">
-          <span class="ledger-date">{{ formatDate(entry.date) }}</span>
-          <span class="ledger-kind" [class.income]="entry.kind === 'INCOME'">{{ entry.kind === "INCOME" ? "Entrada" : "Saída" }}</span>
-          <strong [class.negative]="entry.kind !== 'INCOME'">{{ entry.kind === "INCOME" ? "+" : "−" }} R$ {{ entry.amount | number }}</strong>
-          <span class="ledger-label">{{ entry.label }}</span>
-          <span class="ledger-bar"><i [style.width.%]="ledgerBar(entry)"></i></span>
-        </article>
-      </div>
-    </section>
+    <app-ledger-list [entries]="filteredLedger()" [filter]="ledgerFilter" [formatDate]="formatDate.bind(this)" [bar]="ledgerBar.bind(this)" (filterChange)="ledgerFilter = $event"></app-ledger-list>
     <section class="panel timeline" *ngIf="ledgerTimeline().length">
       <h2>Caixa por dia</h2>
       <div *ngFor="let day of ledgerTimeline()" class="timeline-row">
