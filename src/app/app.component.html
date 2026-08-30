@@ -146,32 +146,10 @@
       <small>PRÉ-CAMPANHA</small>
       <h2>O mandato virou disputa</h2>
       <p>Seu histórico de governo agora será confrontado por duas candidaturas de oposição.</p>
-      <div class="election-candidates">
-        <article *ngFor="let candidate of electionState.candidates" [class.incumbent]="candidate.isIncumbent">
-          <span>{{ candidate.isIncumbent ? 'GOVERNO ATUAL' : 'OPOSIÇÃO' }}</span>
-          <strong>{{ candidate.name }}</strong>
-          <small>{{ candidate.style }}</small>
-          <small>{{ candidate.platform }}</small>
-          <small>Apoio projetado {{ candidate.support | number: '1.0-1' }}% · Rejeição {{ candidate.rejection | number: '1.0-1' }}%</small>
-        </article>
-      </div>
+      <app-election-candidates [candidates]="electionState.candidates" [poll]="electionPoll()" [pollHistory]="electionState.pollHistory"></app-election-candidates>
       <div class="campaign-agenda" *ngIf="electionState.incumbentAgenda.length">
         <small>AGENDA ASSUMIDA</small>
         <span *ngFor="let promise of electionState.promises">{{ promise.label }} · R$ {{ promise.estimatedCost }} mi · {{ promise.deadlineWeeks }} semanas · {{ promiseEffects(promise.groupEffects) }}</span>
-      </div>
-      <div class="election-poll" *ngIf="electionPoll() as poll">
-        <span><b>{{ poll.period }}</b> · {{ poll.undecided | number: '1.0-1' }}% indecisos</span>
-        <span *ngFor="let candidate of poll.candidates">{{ candidate.name }} <b>{{ candidate.support | number: '1.0-1' }}%</b></span>
-      </div>
-      <div class="poll-history" *ngIf="electionState.pollHistory.length > 1">
-        <div class="poll-history-heading"><small>EVOLUÇÃO DAS PESQUISAS</small><span>{{ electionState.pollHistory.length }} medições</span></div>
-        <div class="poll-row" *ngFor="let poll of electionState.pollHistory">
-          <strong>{{ poll.period }}</strong>
-          <div class="poll-bars">
-            <span *ngFor="let candidate of poll.candidates" [style.width.%]="candidate.support" [title]="candidate.name + ': ' + (candidate.support | number: '1.0-1') + '%'"> </span>
-          </div>
-          <em>{{ poll.candidates[0].support | number: '1.0-1' }}%</em>
-        </div>
       </div>
       <p class="panel-note" *ngIf="electionState.phase === 'PRE_CAMPAIGN'">Pré-campanha aberta. Organize sua estratégia antes de pedir o voto.</p>
       <button type="button" *ngIf="electionState.phase === 'PRE_CAMPAIGN'" (click)="startCampaign()">Iniciar campanha →</button>
