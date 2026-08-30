@@ -909,6 +909,21 @@ button {
 /* Mobile reading rhythm: lists behave like distinct, scannable cards instead
    of one continuous block of text. */
 @media (max-width: 700px) {
+  main { padding: 18px 12px 92px; }
+  header { display: block; padding-bottom: 16px; }
+  header h1 { font-size: 24px; line-height: 1.15; padding-right: 0; }
+  .header-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 0 0; }
+  .game-menu { position: static; }
+  .game-menu-items { position: absolute; right: 0; top: 42px; min-width: 210px; }
+  .area-nav { position: sticky; top: 8px; z-index: 10; overflow-x: auto; margin: 12px -4px 18px; padding: 4px; scrollbar-width: none; }
+  .area-nav::-webkit-scrollbar { display: none; }
+  .area-nav a { flex: 0 0 auto; padding: 9px 12px; font-size: 12px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 16px 0; }
+  .stats article { padding: 14px; min-height: 84px; }
+  .stats strong { font-size: 18px; margin-top: 7px; }
+  .grid, .strategy-layout { grid-template-columns: 1fr; gap: 12px; }
+  .panel { padding: 16px; border-radius: 14px; }
+  .game-menu summary { min-height: 40px; box-sizing: border-box; display: inline-flex; align-items: center; }
   .feed-item,
   .consequence-list .feed-item,
   .ledger-entry,
