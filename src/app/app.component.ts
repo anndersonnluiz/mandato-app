@@ -16,6 +16,7 @@ import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
 import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, createDecisionProject as applySharedCreateDecisionProject, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
+import { AreaNavigationService } from './area-navigation.service';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -70,9 +71,11 @@ export class AppComponent {
   onlinePersistence = '';
   pendingOnlineAction?: { kind: 'resolve' | 'advance' | 'continue'; operationId: string; decisionId?: string; optionId?: string } = this.readPendingOnlineAction();
   constructor() {
+    this.activeArea = this.navigation.activeArea;
     this.syncAreaFromHash();
     this.load();
   }
+  private readonly navigation = inject(AreaNavigationService);
   private fromApiGame(view: GameViewContract): Game {
     // A API retorna a mesma forma operacional do motor, mas alguns campos
     // opcionais podem faltar em partidas antigas. Centralizar o limite evita
@@ -169,7 +172,7 @@ export class AppComponent {
     else sessionStorage.removeItem('mandato-pending-online-action');
   }
   selectArea(area: string) {
-    this.activeArea = area;
+    this.activeArea = this.navigation.select(area);
   }
   async exportParityProjection() {
     // A comparação precisa usar a jornada canônica, e não uma partida que o
@@ -187,7 +190,7 @@ export class AppComponent {
   syncAreaFromHash() {
     const area = window.location.hash.replace(/^#/, '');
     if (['gabinete', 'cidade', 'financas', 'memoria', 'metas', 'avaliacao', 'configuracoes'].includes(area)) {
-      this.activeArea = area;
+      this.activeArea = this.navigation.fromHash(area);
     }
   }
   storageModeLabel() {
