@@ -978,11 +978,31 @@ button {
     text-align: left;
   }
 
-  .decision-option {
+.decision-option {
     margin-top: 12px;
     border-radius: 12px;
   }
 }
+.cabinet-decisions .decision {
+  position: relative;
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid #dce8df;
+  border-left: 4px solid #d49b3b;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffffff, #f8fcf9);
+  box-shadow: 0 8px 22px rgba(24, 60, 43, .07);
+}
+.cabinet-decisions .decision:first-of-type { margin-top: 12px; }
+.cabinet-decisions .decision h3 { margin: 10px 0 8px; font-size: 1.2rem; line-height: 1.25; }
+.cabinet-decisions .decision > p { max-width: 70ch; color: #40564a; line-height: 1.55; }
+.cabinet-decisions .actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.cabinet-decisions .choice { display: flex; flex-direction: column; gap: 9px; padding: 16px; border: 1px solid #d8e5db; border-radius: 14px; background: rgba(255,255,255,.82); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.cabinet-decisions .choice:hover { transform: translateY(-2px); border-color: #8fbea3; box-shadow: 0 8px 18px rgba(35,107,78,.1); }
+.cabinet-decisions .choice h4 { margin: 0; color: #173d31; font-size: 1rem; }
+.cabinet-decisions .choice-description { margin: 0; color: #53695c; font-size: .9rem; line-height: 1.45; }
+.cabinet-decisions .choice button { width: 100%; margin-top: auto; }
+@media (max-width: 700px) { .cabinet-decisions .decision { padding: 16px; } .cabinet-decisions .actions { grid-template-columns: 1fr; gap: 11px; } .cabinet-decisions .choice { padding: 14px; } }
 button:disabled {
   opacity: 0.55;
   cursor: wait;
