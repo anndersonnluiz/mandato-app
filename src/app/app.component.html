@@ -243,17 +243,7 @@
       >
     </section>
     <div id="gabinete" class="grid area-anchor">
-      <section class="panel">
-        <h2>Indicadores da cidade</h2>
-        <div *ngFor="let i of game.indicators" class="indicator">
-          <span>{{ i.label }}</span
-          ><b
-            >{{ i.value | number: "1.1-1" }}
-            <em>{{ i.trend > 0 ? "▲" : i.trend < 0 ? "▼" : "—" }}</em></b
-          >
-          <div class="bar" role="progressbar" [attr.aria-label]="i.label" [attr.aria-valuenow]="i.value" aria-valuemin="0" aria-valuemax="100"><i [style.width.%]="i.value"></i></div>
-        </div>
-      </section>
+      <app-city-indicators [indicators]="game.indicators"></app-city-indicators>
       <section class="panel">
         <h2>
           Gabinete <small>{{ pendingDecisions() }} pendente(s)</small>

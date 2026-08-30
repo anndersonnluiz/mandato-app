@@ -18,6 +18,7 @@ import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as app
 import { LocalEngineSession } from './local-engine-session';
 import { AreaNavigationService } from './area-navigation.service';
 import { SummaryStatsComponent } from './summary-stats.component';
+import { CityIndicatorsComponent } from './city-indicators.component';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -31,7 +32,7 @@ type Game = SimulationState & {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, SummaryStatsComponent],
+  imports: [CommonModule, FormsModule, SummaryStatsComponent, CityIndicatorsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
