@@ -543,17 +543,7 @@
         <article><span>Projetos</span><b>R$ {{ categoryTotal("PROJECT") | number }}</b><i><em [style.width.%]="categoryShare('PROJECT')"></em></i><small>{{ categoryShare('PROJECT') | number:'1.0-0' }}% do total</small></article>
       </div>
     </section>
-    <section class="panel budget-controls">
-      <h2>Ajuste de orçamento</h2>
-      <p>Altere a verba diária e observe o impacto no saldo projetado.</p>
-      <div *ngFor="let line of game.budget" class="budget-line">
-        <span class="budget-label"
-          >{{ line.label }} <small>{{ budgetImpact(line.key) }}</small><small class="budget-preview">− {{ budgetPreview(line.key, -500) }} · + {{ budgetPreview(line.key, 500) }}</small></span
-        ><button [attr.aria-label]="'Reduzir verba de ' + line.label" (click)="adjustBudget(line.key, -500)">−</button
-        ><b>R$ {{ line.dailyCost | number }}</b
-        ><button [attr.aria-label]="'Aumentar verba de ' + line.label" (click)="adjustBudget(line.key, 500)">+</button>
-      </div>
-    </section>
+    <app-budget-controls [budget]="game.budget" [impact]="budgetImpact.bind(this)" [preview]="budgetPreview.bind(this)" (adjust)="adjustBudget($event.key, $event.amount)"></app-budget-controls>
     <section class="panel final-report" *ngIf="game.evaluation">
       <h2>Relatório do primeiro ciclo</h2>
       <div>

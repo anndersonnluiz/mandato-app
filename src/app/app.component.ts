@@ -24,6 +24,7 @@ import { AreaNavigationComponent } from './area-navigation.component';
 import { GovernmentMemoryComponent } from './government-memory.component';
 import { ElectionCandidatesComponent } from './election-candidates.component';
 import { ElectionActionsComponent } from './election-actions.component';
+import { BudgetControlsComponent } from './budget-controls.component';
 
 type Game = SimulationState & {
   mayorName: string;
@@ -37,7 +38,7 @@ type Game = SimulationState & {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, SummaryStatsComponent, CityIndicatorsComponent, FinancialStripComponent, AreaNavigationComponent, GovernmentMemoryComponent, ElectionCandidatesComponent, ElectionActionsComponent],
+  imports: [CommonModule, FormsModule, SummaryStatsComponent, CityIndicatorsComponent, FinancialStripComponent, AreaNavigationComponent, GovernmentMemoryComponent, ElectionCandidatesComponent, ElectionActionsComponent, BudgetControlsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
