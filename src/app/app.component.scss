@@ -1032,3 +1032,88 @@ button:disabled {
 @media (max-width: 700px) {
   .evaluation-deltas { grid-template-columns: 1fr; }
 }
+
+/* Cada área funciona como uma tela focada. Os dados continuam no mesmo estado,
+   mas o jogador não precisa atravessar uma landing page interminável. */
+main[data-active-area] > .daily-summary,
+main[data-active-area] > .daily-events,
+main[data-active-area] > .alert,
+main[data-active-area] > .attention,
+main[data-active-area] > .evaluation,
+main[data-active-area] > .election-preview,
+main[data-active-area] > .objectives,
+main[data-active-area] > .cycle-brief,
+main[data-active-area] > .finance-strip,
+main[data-active-area] > #gabinete,
+main[data-active-area] > #cidade,
+main[data-active-area] > .news-panel,
+main[data-active-area] > #memoria,
+main[data-active-area] > .legacy-panel,
+main[data-active-area] > .consequences-panel,
+main[data-active-area] > .chain-panel,
+main[data-active-area] > .financial-summary,
+main[data-active-area] > .ledger,
+main[data-active-area] > .timeline,
+main[data-active-area] > .treasury-delta,
+main[data-active-area] > .category-summary,
+main[data-active-area] > .budget-controls,
+main[data-active-area] > .final-report,
+main[data-active-area] > .population-panel,
+main[data-active-area] > .decision-index,
+main[data-active-area] > .decision-history,
+main[data-active-area] > .decision-dates,
+main[data-active-area] > .decision-finance,
+main[data-active-area] > .evaluation-metrics,
+main[data-active-area] > .live-metrics,
+main[data-active-area] > .reputation-panel,
+main[data-active-area] > .trend-panel,
+main[data-active-area] > .temporary-effects,
+main[data-active-area] > .timeline-panel,
+main[data-active-area] > .snapshot-deltas,
+main[data-active-area] > .history-matrix,
+main[data-active-area] > .trajectory-panel {
+  display: none;
+}
+
+main[data-active-area="gabinete"] > .attention,
+main[data-active-area="gabinete"] > #gabinete,
+main[data-active-area="gabinete"] > .daily-summary,
+main[data-active-area="gabinete"] > .daily-events { display: block; }
+
+main[data-active-area="cidade"] > #cidade,
+main[data-active-area="cidade"] > .daily-events { display: block; }
+
+main[data-active-area="financas"] > .finance-strip,
+main[data-active-area="financas"] > .financial-summary,
+main[data-active-area="financas"] > .ledger,
+main[data-active-area="financas"] > .timeline,
+main[data-active-area="financas"] > .treasury-delta,
+main[data-active-area="financas"] > .category-summary,
+main[data-active-area="financas"] > .budget-controls,
+main[data-active-area="financas"] > .population-panel { display: block; }
+
+main[data-active-area="memoria"] > .news-panel,
+main[data-active-area="memoria"] > #memoria,
+main[data-active-area="memoria"] > .legacy-panel,
+main[data-active-area="memoria"] > .consequences-panel,
+main[data-active-area="memoria"] > .chain-panel,
+main[data-active-area="memoria"] > .temporary-effects { display: block; }
+
+main[data-active-area="metas"] > .objectives,
+main[data-active-area="metas"] > .cycle-brief,
+main[data-active-area="metas"] > .trend-panel,
+main[data-active-area="metas"] > .trajectory-panel { display: block; }
+
+main[data-active-area="avaliacao"] > .evaluation,
+main[data-active-area="avaliacao"] > .election-preview,
+main[data-active-area="avaliacao"] > .final-report,
+main[data-active-area="avaliacao"] > .evaluation-metrics,
+main[data-active-area="avaliacao"] > .decision-index,
+main[data-active-area="avaliacao"] > .decision-history { display: block; }
+
+main[data-active-area="configuracoes"] > #configuracoes { display: block; }
+
+@media (max-width: 700px) {
+  main[data-active-area] > #gabinete,
+  main[data-active-area] > #cidade { grid-template-columns: 1fr; }
+}
