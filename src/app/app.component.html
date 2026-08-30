@@ -27,17 +27,7 @@
       </div>
     </details>
   </header>
-  <nav *ngIf="game" class="area-nav" aria-label="Áreas do governo">
-    <a href="#resumo" [class.active]="activeArea === 'resumo'" [attr.aria-current]="activeArea === 'resumo' ? 'page' : null" (click)="selectArea('resumo')">Resumo</a>
-    <a href="#gabinete" [class.active]="activeArea === 'gabinete'" [attr.aria-current]="activeArea === 'gabinete' ? 'page' : null" (click)="selectArea('gabinete')">Gabinete</a>
-    <a href="#cidade" [class.active]="activeArea === 'cidade'" [attr.aria-current]="activeArea === 'cidade' ? 'page' : null" (click)="selectArea('cidade')">Cidade</a>
-    <a href="#financas" [class.active]="activeArea === 'financas'" [attr.aria-current]="activeArea === 'financas' ? 'page' : null" (click)="selectArea('financas')">Finanças</a>
-    <a href="#memoria" [class.active]="activeArea === 'memoria'" [attr.aria-current]="activeArea === 'memoria' ? 'page' : null" (click)="selectArea('memoria')">Memória</a>
-    <a href="#metas" [class.active]="activeArea === 'metas'" [attr.aria-current]="activeArea === 'metas' ? 'page' : null" (click)="selectArea('metas')">Metas</a>
-    <a href="#avaliacao" [class.active]="activeArea === 'avaliacao'" [attr.aria-current]="activeArea === 'avaliacao' ? 'page' : null" (click)="selectArea('avaliacao')">Avaliação</a>
-    <a href="#eleicoes" [class.active]="activeArea === 'eleicoes'" [attr.aria-current]="activeArea === 'eleicoes' ? 'page' : null" (click)="selectArea('eleicoes')">Eleições</a>
-    <a href="#configuracoes" [class.active]="activeArea === 'configuracoes'" [attr.aria-current]="activeArea === 'configuracoes' ? 'page' : null" (click)="selectArea('configuracoes')">Configurações</a>
-  </nav>
+  <app-area-navigation *ngIf="game" [activeArea]="activeArea" (areaSelected)="selectArea($event)"></app-area-navigation>
   <label *ngIf="game" class="mobile-area-picker">
     <span>Seção atual</span>
     <select [ngModel]="activeArea" (ngModelChange)="selectArea($event)">
