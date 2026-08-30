@@ -28,13 +28,6 @@
     </details>
   </header>
   <app-area-navigation *ngIf="game" [activeArea]="activeArea" (areaSelected)="selectArea($event)"></app-area-navigation>
-  <label *ngIf="game" class="mobile-area-picker">
-    <span>Seção atual</span>
-    <select [ngModel]="activeArea" (ngModelChange)="selectArea($event)">
-      <option value="resumo">Resumo</option><option value="gabinete">Gabinete</option><option value="cidade">Cidade</option><option value="financas">Finanças</option>
-      <option value="memoria">Memória</option><option value="metas">Metas</option><option value="avaliacao">Avaliação</option><option value="eleicoes">Eleições</option>
-    </select>
-  </label>
   <div *ngIf="game" class="area-heading" aria-live="polite" aria-atomic="true">
     <div>
       <small>ÁREA DO MANDATO</small>

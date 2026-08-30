@@ -12,6 +12,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
         {{ area.label }}
       </a>
     </nav>
+    <label class="mobile-area-picker">
+      <span>Seção atual</span>
+      <select [value]="activeArea" (change)="selectValue($event)">
+        <option *ngFor="let area of areas" [value]="area.key">{{ area.label }}</option>
+      </select>
+    </label>
   `,
 })
 export class AreaNavigationComponent {
@@ -28,6 +34,12 @@ export class AreaNavigationComponent {
 
   select(event: MouseEvent, area: string) {
     event.preventDefault();
+    this.areaSelected.emit(area);
+    history.replaceState(null, '', '#' + area);
+  }
+
+  selectValue(event: Event) {
+    const area = (event.target as HTMLSelectElement).value;
     this.areaSelected.emit(area);
     history.replaceState(null, '', '#' + area);
   }
