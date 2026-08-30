@@ -196,6 +196,15 @@ export class AppComponent {
   changeLedgerFilterFromView(value: string) {
     if (value === 'ALL' || value === 'INCOME' || value === 'EXPENSE') this.ledgerFilter = value;
   }
+  areaHasUpdates(area: string) {
+    if (!this.game) return false;
+    if (area === 'gabinete' || area === 'resumo') return this.pendingDecisions() > 0;
+    if (area === 'eleicoes') return !!this.electionState;
+    if (area === 'metas') return (this.game.objectives ?? []).some((item) => item.status === 'COMPLETED');
+    if (area === 'memoria') return (this.game.history?.length ?? 0) > 0;
+    if (area === 'financas') return (this.game.ledger?.length ?? 0) > 0;
+    return false;
+  }
   areaTitle() {
     return ({ resumo: 'Visão geral do mandato', gabinete: 'Decisões do gabinete', cidade: 'A cidade em movimento', financas: 'Saúde financeira do mandato', memoria: 'Memória e consequências', metas: 'Metas e entregas', avaliacao: 'Avaliação do ciclo', eleicoes: 'Eleições e campanha', configuracoes: 'Configurações da partida' } as Record<string, string>)[this.activeArea] ?? 'Mandato';
   }

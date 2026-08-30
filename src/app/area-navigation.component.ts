@@ -9,7 +9,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
     <nav class="area-nav" aria-label="Áreas do governo">
       <a *ngFor="let area of areas" [href]="'#' + area.key" [class.active]="activeArea === area.key"
         [attr.aria-current]="activeArea === area.key ? 'page' : null" (click)="select($event, area.key)">
-        {{ area.label }}
+        {{ area.label }}<i *ngIf="hasUpdates(area.key)" class="nav-update" aria-label="Há novidades nesta área"></i>
       </a>
     </nav>
     <label class="mobile-area-picker">
@@ -22,6 +22,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class AreaNavigationComponent {
   @Input() activeArea = 'resumo';
+  @Input() hasUpdates: (area: string) => boolean = () => false;
   @Output() areaSelected = new EventEmitter<string>();
 
   readonly areas = [

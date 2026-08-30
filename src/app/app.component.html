@@ -27,7 +27,7 @@
       </div>
     </details>
   </header>
-  <app-area-navigation *ngIf="game" [activeArea]="activeArea" (areaSelected)="selectArea($event)"></app-area-navigation>
+  <app-area-navigation *ngIf="game" [activeArea]="activeArea" [hasUpdates]="areaHasUpdates.bind(this)" (areaSelected)="selectArea($event)"></app-area-navigation>
   <div *ngIf="game" class="area-heading" aria-live="polite" aria-atomic="true">
     <div>
       <small>ÁREA DO MANDATO</small>
@@ -737,7 +737,7 @@
     </section>
     <div class="turn-action" *ngIf="!game.evaluation">
       <div><span class="section-kicker">PRÓXIMO TURNO</span><strong>Pronto para atualizar o governo?</strong><small>Avance um dia e veja as consequências das suas escolhas.</small></div>
-      <button class="advance" [disabled]="onlineBusy" (click)="advance()">Avançar 1 dia <span>→</span></button>
+      <button class="advance" [disabled]="onlineBusy || pendingDecisions() > 0" (click)="advance()">{{ pendingDecisions() ? 'Resolva as decisões pendentes' : 'Avançar 1 dia' }} <span>→</span></button>
     </div>
   </ng-container>
 </main>
