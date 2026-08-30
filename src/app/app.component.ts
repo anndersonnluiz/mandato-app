@@ -192,6 +192,9 @@ export class AppComponent {
   answerElectionDebateFromView(answer: string) {
     this.answerElectionDebate(answer as any);
   }
+  changeLedgerFilterFromView(value: string) {
+    if (value === 'ALL' || value === 'INCOME' || value === 'EXPENSE') this.ledgerFilter = value;
+  }
   areaTitle() {
     return ({ resumo: 'Visão geral do mandato', gabinete: 'Decisões do gabinete', cidade: 'A cidade em movimento', financas: 'Saúde financeira do mandato', memoria: 'Memória e consequências', metas: 'Metas e entregas', avaliacao: 'Avaliação do ciclo', eleicoes: 'Eleições e campanha', configuracoes: 'Configurações da partida' } as Record<string, string>)[this.activeArea] ?? 'Mandato';
   }

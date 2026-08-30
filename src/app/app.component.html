@@ -501,7 +501,7 @@
         <span class="no-policy" *ngIf="!policies.commerceIncentive && !policies.taxModernization">Nenhum programa ativo neste momento.</span>
       </div>
     </section>
-    <app-ledger-list [entries]="filteredLedger()" [filter]="ledgerFilter" [formatDate]="formatDate.bind(this)" [bar]="ledgerBar.bind(this)" (filterChange)="ledgerFilter = $event"></app-ledger-list>
+    <app-ledger-list [entries]="filteredLedger()" [filter]="ledgerFilter" [formatDate]="formatDate.bind(this)" [bar]="ledgerBar.bind(this)" (filterChange)="changeLedgerFilterFromView($event)"></app-ledger-list>
     <section class="panel timeline" *ngIf="ledgerTimeline().length">
       <h2>Caixa por dia</h2>
       <div *ngFor="let day of ledgerTimeline()" class="timeline-row">
