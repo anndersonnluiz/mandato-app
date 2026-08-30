@@ -45,7 +45,7 @@
       <option value="memoria">Memória</option><option value="metas">Metas</option><option value="avaliacao">Avaliação</option><option value="eleicoes">Eleições</option>
     </select>
   </label>
-  <div *ngIf="game" class="area-heading" aria-live="polite">
+  <div *ngIf="game" class="area-heading" aria-live="polite" aria-atomic="true">
     <div>
       <small>ÁREA DO MANDATO</small>
       <h2>{{ areaTitle() }}</h2>

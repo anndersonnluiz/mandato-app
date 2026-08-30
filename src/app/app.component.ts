@@ -176,6 +176,9 @@ export class AppComponent {
   }
   selectArea(area: string) {
     this.activeArea = this.navigation.select(area);
+    if (typeof document !== 'undefined') {
+      requestAnimationFrame(() => document.getElementById('conteudo-principal')?.focus({ preventScroll: true }));
+    }
   }
   areaTitle() {
     return ({ resumo: 'Visão geral do mandato', gabinete: 'Decisões do gabinete', cidade: 'A cidade em movimento', financas: 'Saúde financeira do mandato', memoria: 'Memória e consequências', metas: 'Metas e entregas', avaliacao: 'Avaliação do ciclo', eleicoes: 'Eleições e campanha', configuracoes: 'Configurações da partida' } as Record<string, string>)[this.activeArea] ?? 'Mandato';
