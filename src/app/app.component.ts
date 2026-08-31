@@ -1030,10 +1030,10 @@ export class AppComponent {
   advance() {
     this.advanceWithMode('DAY');
   }
-  advanceTo(mode: 'DECISION' | 'NOTIFICATION' | 'MONTH') {
+  advanceTo(mode: 'DECISION' | 'NOTIFICATION' | 'MONTH' | 'WEEK') {
     this.advanceWithMode(mode);
   }
-  private advanceWithMode(mode: 'DAY' | 'DECISION' | 'NOTIFICATION' | 'MONTH') {
+  private advanceWithMode(mode: 'DAY' | 'DECISION' | 'NOTIFICATION' | 'MONTH' | 'WEEK') {
     if (!this.game || this.game.evaluation || this.advancing || this.onlineBusy) return;
     const before = this.game;
     const beforeLedger = before.ledger ?? [];
@@ -1080,7 +1080,7 @@ export class AppComponent {
       } else {
         const result = applySharedAdvanceUntil(this.game as any, this.sharedLocalSession as any, mode, 31);
         this.game = result.state as unknown as Game;
-        this.feedback = `Avançamos ${result.daysAdvanced} dia(s) até ${result.reason === 'DECISION' ? 'uma decisão' : result.reason === 'MONTH' ? 'o próximo mês' : 'uma notificação'}.`;
+        this.feedback = `Avançamos ${result.daysAdvanced} dia(s) até ${result.reason === 'DECISION' ? 'uma decisão' : result.reason === 'MONTH' ? 'o próximo mês' : result.reason === 'LIMIT' && mode === 'WEEK' ? 'o fim da semana' : 'uma notificação'}.`;
         this.advanceSummary = this.buildAdvanceSummary(before, this.game, result.daysAdvanced, beforeLedger, beforeHistory, beforeNews);
       }
       this.save();

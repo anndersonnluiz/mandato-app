@@ -43,7 +43,7 @@ export class ApiGameRepository {
       this.operationHeaders(operationId),
     );
   }
-  advanceUntil(id: string, mode: 'DECISION' | 'NOTIFICATION' | 'MONTH', operationId?: string): Observable<GameViewContract & { advanceSummary?: { daysAdvanced: number; mode: string } }> {
+  advanceUntil(id: string, mode: 'DECISION' | 'NOTIFICATION' | 'MONTH' | 'WEEK', operationId?: string): Observable<GameViewContract & { advanceSummary?: { daysAdvanced: number; mode: string } }> {
     return this.http.post<GameViewContract & { advanceSummary?: { daysAdvanced: number; mode: string } }>(
       `${this.baseUrl}/games/${id}/advance-until`, { mode }, this.operationHeaders(operationId),
     );

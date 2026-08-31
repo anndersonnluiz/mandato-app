@@ -751,6 +751,7 @@
       <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('DECISION')">Próxima decisão</button>
       <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('NOTIFICATION')">Próximo evento</button>
       <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('MONTH')">Próximo mês</button>
+      <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('WEEK')">Avançar 7 dias</button>
       </div>
     </div>
     <section class="advance-summary" *ngIf="advanceSummary && !advancing">
