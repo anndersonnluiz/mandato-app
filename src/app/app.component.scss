@@ -490,6 +490,8 @@ button {
 .advance-summary small { color: #638276; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
 .advance-summary b { color: #1e2930; }
 .advance-summary .positive-value { color: #207653; }
+.advance-highlights { grid-column: 1 / -1; border-top: 1px solid #d5e7dc; padding-top: 12px; gap: 3px !important; }
+.advance-highlights span { color: #35564a; font-size: 13px; line-height: 1.35; }
 @media (max-width: 760px) { .advance-summary { grid-template-columns: repeat(2, 1fr); } .advance-summary > div:first-child { grid-column: 1 / -1; } }
 .advance-spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.38); border-top-color: #fff; border-radius: 50%; animation: advance-spin .75s linear infinite; }
 @keyframes advance-spin { to { transform: rotate(360deg); } }

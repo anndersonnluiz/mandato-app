@@ -78,6 +78,7 @@ export class AppComponent {
   onlineBusy = false;
   advancing = false;
   advanceSummary?: { days: number; treasuryDelta: number; income: number; expenses: number; decisions: number; notifications: number };
+  advanceHighlights: string[] = [];
   activeArea = 'resumo';
   selectedCabinetDecisionId?: string;
   onlinePersistence = '';
@@ -1090,6 +1091,8 @@ export class AppComponent {
   }
   private buildAdvanceSummary(before: Game, after: Game, days: number, beforeLedger: any[], beforeHistory: Set<string>, beforeNews: Set<string>) {
     const entries = (after.ledger ?? []).filter((entry: any) => !beforeLedger.some((old: any) => old.date === entry.date && old.label === entry.label && old.amount === entry.amount && old.kind === entry.kind));
+    this.advanceHighlights = [...(after.news ?? []).filter((item) => !beforeNews.has(item)), ...(after.history ?? []).filter((item) => !beforeHistory.has(item))]
+      .map((item) => this.formatNarrative(item)).filter(Boolean).slice(0, 4);
     return {
       days,
       treasuryDelta: Number(after.treasury ?? 0) - Number(before.treasury ?? 0),

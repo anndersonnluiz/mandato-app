@@ -760,6 +760,10 @@
       <div><small>Entradas</small><b>{{ advanceSummary.income | currency:'BRL':'symbol':'1.0-0' }}</b></div>
       <div><small>Despesas</small><b>{{ advanceSummary.expenses | currency:'BRL':'symbol':'1.0-0' }}</b></div>
       <div><small>Acontecimentos</small><b>{{ advanceSummary.notifications }}</b></div>
+      <div class="advance-highlights" *ngIf="advanceHighlights.length">
+        <small>O que merece atenção</small>
+        <span *ngFor="let highlight of advanceHighlights">{{ highlight }}</span>
+      </div>
     </section>
   </ng-container>
 </main>
