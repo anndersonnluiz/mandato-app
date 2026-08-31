@@ -480,6 +480,10 @@ button {
 .advance:focus-visible { outline: 3px solid rgba(212, 155, 59, .45); outline-offset: 3px; }
 .advance:disabled { opacity: .6; cursor: wait; box-shadow: none; }
 .advance.is-processing { opacity: 1; cursor: wait; background: linear-gradient(135deg, #266f54, #1d5c46); }
+.turn-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; align-items: center; }
+.advance-secondary { border: 1px solid #b7d7c7; background: #f2f8f4; color: #185c45; border-radius: 10px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
+.advance-secondary:hover:not(:disabled) { background: #e2f1e8; transform: translateY(-1px); }
+.advance-secondary:disabled { opacity: .55; cursor: wait; }
 .advance-spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.38); border-top-color: #fff; border-radius: 50%; animation: advance-spin .75s linear infinite; }
 @keyframes advance-spin { to { transform: rotate(360deg); } }
 .stats strong { white-space: nowrap; font-variant-numeric: tabular-nums; }

@@ -14,7 +14,7 @@ import { ApiGameRepository } from './api-game-repository';
 import { GameViewContract } from './api-game-contract';
 import { createInitialSimulationState } from './simulation-state-factory';
 import { CampaignAction, ElectionEngine, ElectionState } from './election-engine';
-import { adjustBudget as applySharedBudgetAdjustment, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, createDecisionProject as applySharedCreateDecisionProject, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
+import { adjustBudget as applySharedBudgetAdjustment, advanceUntil as applySharedAdvanceUntil, applyFiscalResponse as applySharedFiscalResponse, applyAdministrativeDecision as applySharedAdministrativeDecision, applySecretaryDemandDecision as applySharedSecretaryDemandDecision, createDecisionProject as applySharedCreateDecisionProject, applyDecisionSocialEffects as applySharedDecisionSocialEffects } from '@mandato/engine';
 import { LocalEngineSession } from './local-engine-session';
 import { AreaNavigationService } from './area-navigation.service';
 import { SummaryStatsComponent } from './summary-stats.component';
@@ -1027,20 +1027,31 @@ export class AppComponent {
       : '';
   }
   advance() {
+    this.advanceWithMode('DAY');
+  }
+  advanceTo(mode: 'DECISION' | 'NOTIFICATION' | 'MONTH') {
+    this.advanceWithMode(mode);
+  }
+  private advanceWithMode(mode: 'DAY' | 'DECISION' | 'NOTIFICATION' | 'MONTH') {
     if (!this.game || this.game.evaluation || this.advancing || this.onlineBusy) return;
     this.advancing = true;
     if (this.onlineMode && this.api) {
       this.onlineBusy = true;
       const operationId = this.pendingOnlineAction?.kind === 'advance' ? this.pendingOnlineAction.operationId : crypto.randomUUID();
       this.setPendingOnlineAction({ kind: 'advance', operationId });
-      this.api.advance((this.game as any).id, operationId).subscribe({
+      const request = mode === 'DAY'
+        ? this.api.advance((this.game as any).id, operationId)
+        : this.api.advanceUntil((this.game as any).id, mode, operationId);
+      request.subscribe({
         next: (game) => {
           this.onlineBusy = false;
           this.advancing = false;
           this.connectionStatus = 'ONLINE';
           this.game = this.fromApiGame(game);
-          this.feedback =
-            'O Simulation Engine processou os efeitos da decisão.';
+          const summary = (game as any).advanceSummary;
+          this.feedback = summary
+            ? `Avançamos ${summary.daysAdvanced} dia(s) até o próximo ponto de atenção.`
+            : 'O Simulation Engine processou os efeitos da decisão.';
           this.setPendingOnlineAction();
         },
         error: () => {
@@ -1055,9 +1066,15 @@ export class AppComponent {
     // A ativação do pipeline compartilhado aguarda a adaptação dos relatórios
     // enriquecidos, preservando o fluxo completo das partidas existentes.
     try {
-      const result = this.engine.advanceDay(this.game);
-      this.game = result.state as Game;
-      this.feedback = result.report;
+      if (mode === 'DAY') {
+        const result = this.engine.advanceDay(this.game);
+        this.game = result.state as Game;
+        this.feedback = result.report;
+      } else {
+        const result = applySharedAdvanceUntil(this.game as any, this.sharedLocalSession as any, mode, 31);
+        this.game = result.state as Game;
+        this.feedback = `Avançamos ${result.daysAdvanced} dia(s) até ${result.reason === 'DECISION' ? 'uma decisão' : result.reason === 'MONTH' ? 'o próximo mês' : 'uma notificação'}.`;
+      }
       this.save();
     } finally {
       this.advancing = false;
