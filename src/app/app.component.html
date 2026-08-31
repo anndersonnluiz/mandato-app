@@ -740,18 +740,21 @@
      <button *ngIf="!game.activeFocus" type="button" [disabled]="onlineBusy" (click)="adoptTrajectoryFocus()">Adotar como foco por 7 dias</button>
       </div>
     </section>
-    <div class="turn-action" *ngIf="!game.evaluation">
-      <div><span class="section-kicker">PRÓXIMO TURNO</span><strong>Pronto para atualizar o governo?</strong><small>Avance um dia e veja as consequências das suas escolhas.</small></div>
+    <div class="turn-action">
+      <div><span class="section-kicker">{{ game.evaluation ? 'PRÓXIMO CICLO' : 'PRÓXIMO TURNO' }}</span><strong>{{ game.evaluation ? 'O ciclo foi avaliado.' : 'Pronto para atualizar o governo?' }}</strong><small>{{ game.evaluation ? 'Resolva as decisões pendentes antes de iniciar o próximo ciclo.' : 'Avance e veja as consequências das suas escolhas.' }}</small></div>
       <div class="turn-actions">
-      <button class="advance" [class.is-processing]="advancing" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advance()">
+      <button *ngIf="!game.evaluation" class="advance" [class.is-processing]="advancing" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advance()">
         <span *ngIf="advancing" class="advance-spinner" aria-hidden="true"></span>
         <span>{{ advancing ? 'Processando o dia…' : (pendingDecisions() ? 'Resolva as decisões pendentes' : 'Avançar 1 dia') }}</span>
         <span *ngIf="!advancing">→</span>
       </button>
-      <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('DECISION')">Próxima decisão</button>
-      <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('NOTIFICATION')">Próximo evento</button>
-      <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('MONTH')">Próximo mês</button>
-      <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('WEEK')">Avançar 7 dias</button>
+      <ng-container *ngIf="!game.evaluation; else continueCycleAction">
+        <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('DECISION')">Próxima decisão</button>
+        <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('NOTIFICATION')">Próximo evento</button>
+        <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('MONTH')">Próximo mês</button>
+        <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('WEEK')">Avançar 7 dias</button>
+      </ng-container>
+      <ng-template #continueCycleAction><button class="advance" [disabled]="onlineBusy || pendingDecisions() > 0" (click)="continueMandate()">{{ pendingDecisions() ? 'Resolva as decisões pendentes' : 'Iniciar próximo ciclo' }} <span>→</span></button></ng-template>
       </div>
     </div>
     <section class="advance-summary" *ngIf="advanceSummary && !advancing">

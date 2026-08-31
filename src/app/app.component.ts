@@ -135,6 +135,7 @@ export class AppComponent {
           .replace(/Relatório de marco: \d{2}\/\d{2}\/\d{4}:/g, 'Relatório de marco:')
           .replace(/^(Boletim do dia:\s*)+/, 'Boletim do dia: ')
           .replace(/^(Resumo do dia:\s*)+/, 'Resumo do dia: ')
+          .replace(/(caixa\s+)(-?\d+(?:\.\d+)?)(?=[.,;\s]|$)/gi, (_match, label, amount) => `${label}${Number(amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}`)
           .replace(/\b-?\d+\.\d{4,}\b/g, (number) => Number(number).toFixed(1).replace('.', ','))
       : '';
   }
