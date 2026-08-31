@@ -1068,11 +1068,11 @@ export class AppComponent {
     try {
       if (mode === 'DAY') {
         const result = this.engine.advanceDay(this.game);
-        this.game = result.state as Game;
+        this.game = result.state as unknown as Game;
         this.feedback = result.report;
       } else {
         const result = applySharedAdvanceUntil(this.game as any, this.sharedLocalSession as any, mode, 31);
-        this.game = result.state as Game;
+        this.game = result.state as unknown as Game;
         this.feedback = `Avançamos ${result.daysAdvanced} dia(s) até ${result.reason === 'DECISION' ? 'uma decisão' : result.reason === 'MONTH' ? 'o próximo mês' : 'uma notificação'}.`;
       }
       this.save();
