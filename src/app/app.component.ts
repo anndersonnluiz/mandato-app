@@ -1079,7 +1079,9 @@ export class AppComponent {
         this.feedback = result.report;
         this.advanceSummary = this.buildAdvanceSummary(before, this.game, 1, beforeLedger, beforeHistory, beforeNews);
       } else {
-        const result = applySharedAdvanceUntil(this.game as any, this.sharedLocalSession as any, mode, 31);
+        const result = typeof applySharedAdvanceUntil === 'function'
+          ? applySharedAdvanceUntil(this.game as any, this.sharedLocalSession as any, mode, 31)
+          : this.advanceUntilWithLocalCompatibility(this.game, mode);
         this.game = result.state as unknown as Game;
         this.feedback = `Avançamos ${result.daysAdvanced} dia(s) até ${result.reason === 'DECISION' ? 'uma decisão' : result.reason === 'MONTH' ? 'o próximo mês' : result.reason === 'LIMIT' && mode === 'WEEK' ? 'o fim da semana' : 'uma notificação'}.`;
         this.advanceSummary = this.buildAdvanceSummary(before, this.game, result.daysAdvanced, beforeLedger, beforeHistory, beforeNews);
@@ -1088,6 +1090,22 @@ export class AppComponent {
     } finally {
       this.advancing = false;
     }
+  }
+  private advanceUntilWithLocalCompatibility(state: Game, mode: 'DECISION' | 'NOTIFICATION' | 'MONTH' | 'WEEK') {
+    const initialMonth = state.currentDate.slice(0, 7);
+    const initialHistory = new Set(state.history ?? []);
+    const initialNews = new Set(state.news ?? []);
+    let daysAdvanced = 0;
+    const limit = mode === 'WEEK' ? 7 : 31;
+    while (daysAdvanced < limit) {
+      state = this.sharedLocalSession.execute(state, { type: 'ADVANCE_DAY' }) as Game;
+      daysAdvanced += 1;
+      const decision = state.decisions.some((item) => item.status === 'PENDING');
+      const notification = state.news.some((item) => !initialNews.has(item)) || state.history.some((item) => !initialHistory.has(item));
+      const month = state.currentDate.slice(0, 7) !== initialMonth;
+      if ((mode === 'DECISION' && decision) || (mode === 'NOTIFICATION' && (decision || notification)) || (mode === 'MONTH' && (decision || month)) || (mode === 'WEEK' && decision)) break;
+    }
+    return { state, daysAdvanced, reason: 'LIMIT' as const };
   }
   private buildAdvanceSummary(before: Game, after: Game, days: number, beforeLedger: any[], beforeHistory: Set<string>, beforeNews: Set<string>) {
     const entries = (after.ledger ?? []).filter((entry: any) => !beforeLedger.some((old: any) => old.date === entry.date && old.label === entry.label && old.amount === entry.amount && old.kind === entry.kind));
