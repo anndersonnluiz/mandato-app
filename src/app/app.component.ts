@@ -76,6 +76,7 @@ export class AppComponent {
   connectionStatus: 'OFFLINE' | 'CHECKING' | 'ONLINE' | 'UNAVAILABLE' =
     'OFFLINE';
   onlineBusy = false;
+  advancing = false;
   activeArea = 'resumo';
   selectedCabinetDecisionId?: string;
   onlinePersistence = '';
@@ -1026,15 +1027,16 @@ export class AppComponent {
       : '';
   }
   advance() {
-    if (!this.game || this.game.evaluation) return;
+    if (!this.game || this.game.evaluation || this.advancing || this.onlineBusy) return;
+    this.advancing = true;
     if (this.onlineMode && this.api) {
-      if (this.onlineBusy) return;
       this.onlineBusy = true;
       const operationId = this.pendingOnlineAction?.kind === 'advance' ? this.pendingOnlineAction.operationId : crypto.randomUUID();
       this.setPendingOnlineAction({ kind: 'advance', operationId });
       this.api.advance((this.game as any).id, operationId).subscribe({
         next: (game) => {
           this.onlineBusy = false;
+          this.advancing = false;
           this.connectionStatus = 'ONLINE';
           this.game = this.fromApiGame(game);
           this.feedback =
@@ -1043,6 +1045,7 @@ export class AppComponent {
         },
         error: () => {
           this.onlineBusy = false;
+          this.advancing = false;
           this.connectionStatus = 'UNAVAILABLE';
           this.feedback = 'A API não conseguiu avançar o dia.';
         },
@@ -1051,10 +1054,14 @@ export class AppComponent {
     }
     // A ativação do pipeline compartilhado aguarda a adaptação dos relatórios
     // enriquecidos, preservando o fluxo completo das partidas existentes.
-    const result = this.engine.advanceDay(this.game);
-    this.game = result.state as Game;
-    this.feedback = result.report;
-    this.save();
+    try {
+      const result = this.engine.advanceDay(this.game);
+      this.game = result.state as Game;
+      this.feedback = result.report;
+      this.save();
+    } finally {
+      this.advancing = false;
+    }
   }
   retryOnlineAction() {
     const action = this.pendingOnlineAction;

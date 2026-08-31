@@ -742,7 +742,11 @@
     </section>
     <div class="turn-action" *ngIf="!game.evaluation">
       <div><span class="section-kicker">PRÓXIMO TURNO</span><strong>Pronto para atualizar o governo?</strong><small>Avance um dia e veja as consequências das suas escolhas.</small></div>
-      <button class="advance" [disabled]="onlineBusy || pendingDecisions() > 0" (click)="advance()">{{ pendingDecisions() ? 'Resolva as decisões pendentes' : 'Avançar 1 dia' }} <span>→</span></button>
+      <button class="advance" [class.is-processing]="advancing" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advance()">
+        <span *ngIf="advancing" class="advance-spinner" aria-hidden="true"></span>
+        <span>{{ advancing ? 'Processando o dia…' : (pendingDecisions() ? 'Resolva as decisões pendentes' : 'Avançar 1 dia') }}</span>
+        <span *ngIf="!advancing">→</span>
+      </button>
     </div>
   </ng-container>
 </main>

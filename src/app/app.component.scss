@@ -479,6 +479,9 @@ button {
 .advance:hover:not(:disabled) { transform: translateY(-1px); background: linear-gradient(135deg, #2d825f, #236f50); box-shadow: 0 7px 16px rgba(35, 107, 78, .22); }
 .advance:focus-visible { outline: 3px solid rgba(212, 155, 59, .45); outline-offset: 3px; }
 .advance:disabled { opacity: .6; cursor: wait; box-shadow: none; }
+.advance.is-processing { opacity: 1; cursor: wait; background: linear-gradient(135deg, #266f54, #1d5c46); }
+.advance-spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.38); border-top-color: #fff; border-radius: 50%; animation: advance-spin .75s linear infinite; }
+@keyframes advance-spin { to { transform: rotate(360deg); } }
 .stats strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .stats .stat-value { font-size: clamp(1.05rem, 1.8vw, 1.35rem); letter-spacing: -.035em; line-height: 1.15; }
 .stats .money-value { font-size: clamp(.93rem, 1.55vw, 1.2rem); letter-spacing: -.045em; }
