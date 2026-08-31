@@ -753,5 +753,12 @@
       <button class="advance-secondary" [disabled]="advancing || onlineBusy || pendingDecisions() > 0" (click)="advanceTo('MONTH')">Próximo mês</button>
       </div>
     </div>
+    <section class="advance-summary" *ngIf="advanceSummary && !advancing">
+      <div><span class="section-kicker">RESUMO DO AVANÇO</span><strong>{{ advanceSummary.days }} dia(s) processado(s)</strong></div>
+      <div><small>Caixa</small><b [class.positive-value]="advanceSummary.treasuryDelta >= 0">{{ advanceSummary.treasuryDelta >= 0 ? '+' : '' }}{{ advanceSummary.treasuryDelta | currency:'BRL':'symbol':'1.0-0' }}</b></div>
+      <div><small>Entradas</small><b>{{ advanceSummary.income | currency:'BRL':'symbol':'1.0-0' }}</b></div>
+      <div><small>Despesas</small><b>{{ advanceSummary.expenses | currency:'BRL':'symbol':'1.0-0' }}</b></div>
+      <div><small>Acontecimentos</small><b>{{ advanceSummary.notifications }}</b></div>
+    </section>
   </ng-container>
 </main>

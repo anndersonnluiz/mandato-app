@@ -77,6 +77,7 @@ export class AppComponent {
     'OFFLINE';
   onlineBusy = false;
   advancing = false;
+  advanceSummary?: { days: number; treasuryDelta: number; income: number; expenses: number; decisions: number; notifications: number };
   activeArea = 'resumo';
   selectedCabinetDecisionId?: string;
   onlinePersistence = '';
@@ -1034,6 +1035,10 @@ export class AppComponent {
   }
   private advanceWithMode(mode: 'DAY' | 'DECISION' | 'NOTIFICATION' | 'MONTH') {
     if (!this.game || this.game.evaluation || this.advancing || this.onlineBusy) return;
+    const before = this.game;
+    const beforeLedger = before.ledger ?? [];
+    const beforeHistory = new Set(before.history ?? []);
+    const beforeNews = new Set(before.news ?? []);
     this.advancing = true;
     if (this.onlineMode && this.api) {
       this.onlineBusy = true;
@@ -1049,6 +1054,7 @@ export class AppComponent {
           this.connectionStatus = 'ONLINE';
           this.game = this.fromApiGame(game);
           const summary = (game as any).advanceSummary;
+          this.advanceSummary = this.buildAdvanceSummary(before, this.game, summary?.daysAdvanced ?? 1, beforeLedger, beforeHistory, beforeNews);
           this.feedback = summary
             ? `Avançamos ${summary.daysAdvanced} dia(s) até o próximo ponto de atenção.`
             : 'O Simulation Engine processou os efeitos da decisão.';
@@ -1070,15 +1076,28 @@ export class AppComponent {
         const result = this.engine.advanceDay(this.game);
         this.game = result.state as unknown as Game;
         this.feedback = result.report;
+        this.advanceSummary = this.buildAdvanceSummary(before, this.game, 1, beforeLedger, beforeHistory, beforeNews);
       } else {
         const result = applySharedAdvanceUntil(this.game as any, this.sharedLocalSession as any, mode, 31);
         this.game = result.state as unknown as Game;
         this.feedback = `Avançamos ${result.daysAdvanced} dia(s) até ${result.reason === 'DECISION' ? 'uma decisão' : result.reason === 'MONTH' ? 'o próximo mês' : 'uma notificação'}.`;
+        this.advanceSummary = this.buildAdvanceSummary(before, this.game, result.daysAdvanced, beforeLedger, beforeHistory, beforeNews);
       }
       this.save();
     } finally {
       this.advancing = false;
     }
+  }
+  private buildAdvanceSummary(before: Game, after: Game, days: number, beforeLedger: any[], beforeHistory: Set<string>, beforeNews: Set<string>) {
+    const entries = (after.ledger ?? []).filter((entry: any) => !beforeLedger.some((old: any) => old.date === entry.date && old.label === entry.label && old.amount === entry.amount && old.kind === entry.kind));
+    return {
+      days,
+      treasuryDelta: Number(after.treasury ?? 0) - Number(before.treasury ?? 0),
+      income: entries.filter((entry: any) => entry.kind === 'INCOME').reduce((sum: number, entry: any) => sum + Number(entry.amount ?? 0), 0),
+      expenses: entries.filter((entry: any) => entry.kind === 'EXPENSE').reduce((sum: number, entry: any) => sum + Number(entry.amount ?? 0), 0),
+      decisions: (after.decisions ?? []).filter((item: any) => item.status === 'PENDING').length - (before.decisions ?? []).filter((item: any) => item.status === 'PENDING').length,
+      notifications: (after.news ?? []).filter((item) => !beforeNews.has(item)).length + (after.history ?? []).filter((item) => !beforeHistory.has(item)).length,
+    };
   }
   retryOnlineAction() {
     const action = this.pendingOnlineAction;

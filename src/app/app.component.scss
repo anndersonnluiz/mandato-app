@@ -484,6 +484,13 @@ button {
 .advance-secondary { border: 1px solid #b7d7c7; background: #f2f8f4; color: #185c45; border-radius: 10px; padding: 11px 14px; font-weight: 700; cursor: pointer; }
 .advance-secondary:hover:not(:disabled) { background: #e2f1e8; transform: translateY(-1px); }
 .advance-secondary:disabled { opacity: .55; cursor: wait; }
+.advance-summary { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 14px; margin-top: 12px; padding: 16px 18px; border: 1px solid #c5dfd1; border-radius: 14px; background: linear-gradient(115deg, #eff8f2, #fbfdfb); box-shadow: 0 8px 20px rgba(21, 83, 59, .06); }
+.advance-summary > div { display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+.advance-summary strong { color: #15583f; }
+.advance-summary small { color: #638276; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.advance-summary b { color: #1e2930; }
+.advance-summary .positive-value { color: #207653; }
+@media (max-width: 760px) { .advance-summary { grid-template-columns: repeat(2, 1fr); } .advance-summary > div:first-child { grid-column: 1 / -1; } }
 .advance-spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.38); border-top-color: #fff; border-radius: 50%; animation: advance-spin .75s linear infinite; }
 @keyframes advance-spin { to { transform: rotate(360deg); } }
 .stats strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
